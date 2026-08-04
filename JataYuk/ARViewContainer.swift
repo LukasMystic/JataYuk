@@ -2,9 +2,7 @@
 //  ARViewContainer.swift
 //  JataYuk
 //
-//  UIViewRepresentable bridge — wraps ARView so it can live inside a SwiftUI ZStack.
-//  Scene setup (coaching overlay, gesture recognizer) lives here; all AR entity
-//  logic is in ARViewCoordinator.
+//  Created by Stanley Pratama Teguh on 04/08/26.
 //
 
 import SwiftUI
@@ -33,10 +31,8 @@ struct ARViewContainer: UIViewRepresentable {
         context.coordinator.arView = arView
         context.coordinator.setupSubscriptions()
 
-        let tap = UITapGestureRecognizer(
-            target: context.coordinator,
-            action: #selector(ARViewCoordinator.handleTap(_:))
-        )
+        let tap = UITapGestureRecognizer(target: context.coordinator,
+                                         action: #selector(ARViewCoordinator.handleTap(_:)))
         arView.addGestureRecognizer(tap)
         return arView
     }

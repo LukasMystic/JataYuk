@@ -2,8 +2,7 @@
 //  PourPromptView.swift
 //  JataYuk
 //
-//  View — full-screen overlay shown when a source beaker is picked up.
-//  Shows animated gesture instructions and an amount slider (tilt beakers only).
+//  Created by Stanley Pratama Teguh on 04/08/26.
 //
 
 import SwiftUI
@@ -19,15 +18,14 @@ struct PourPromptView: View {
 
     private var amountBinding: Binding<Double> {
         switch beaker {
-        case .h2o2:  return $viewModel.h2o2Amount
-        case .soap:  return $viewModel.soapAmount
+        case .h2o2: return $viewModel.h2o2Amount
+        case .soap: return $viewModel.soapAmount
         case .yeast: return .constant(1.0)
         }
     }
 
     var body: some View {
         ZStack {
-            // Dim background — tap outside the card to put the beaker back.
             Color.black.opacity(0.30)
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
@@ -38,18 +36,15 @@ struct PourPromptView: View {
                     .font(.system(size: 46))
                     .foregroundStyle(accentColor)
 
-                Text(beaker.displayName)
-                    .font(.title.bold())
+                Text(beaker.displayName).font(.title.bold())
 
                 Divider().padding(.horizontal)
 
-                // Gesture instruction + vertical amount slider side-by-side.
                 if beaker.useShake {
                     shakeInstruction
                 } else {
                     HStack(alignment: .center, spacing: 20) {
-                        tiltInstruction
-                            .frame(maxWidth: .infinity)
+                        tiltInstruction.frame(maxWidth: .infinity)
                         verticalAmountSlider
                     }
                 }
@@ -65,31 +60,21 @@ struct PourPromptView: View {
         }
     }
 
-    // MARK: - Vertical Amount Slider
-
-    /// Tall, narrow slider on the right edge — easier to reach on iPad than
-    /// a full-width horizontal track.
     private var verticalAmountSlider: some View {
         VStack(spacing: 8) {
             Text("\(Int(amountBinding.wrappedValue * 100))%")
                 .font(.title3.bold().monospacedDigit())
                 .foregroundStyle(accentColor)
 
-            // Rotate the track -90° so it runs bottom→top.
-            // The .frame(width:) before rotation becomes the visual height.
             Slider(value: amountBinding, in: 0.1...1.0)
                 .rotationEffect(.degrees(-90))
                 .frame(width: 150)
                 .frame(width: 44, height: 150)
                 .tint(accentColor)
 
-            Text("Amount")
-                .font(.caption.bold())
-                .foregroundStyle(.secondary)
+            Text("Amount").font(.caption.bold()).foregroundStyle(.secondary)
         }
     }
-
-    // MARK: - Gesture Instructions
 
     private var tiltInstruction: some View {
         VStack(spacing: 14) {
@@ -98,8 +83,7 @@ struct PourPromptView: View {
                     .font(.system(size: 40, weight: .bold))
                     .foregroundStyle(accentColor)
                     .opacity(arrowPhase ? 1.0 : 0.20)
-                Image(systemName: "ipad.landscape")
-                    .font(.system(size: 48))
+                Image(systemName: "ipad.landscape").font(.system(size: 48))
                 Image(systemName: "arrow.right")
                     .font(.system(size: 40, weight: .bold))
                     .foregroundStyle(accentColor)
@@ -110,8 +94,7 @@ struct PourPromptView: View {
                     arrowPhase = true
                 }
             }
-            Text("Tilt Left or Right")
-                .font(.title2.bold())
+            Text("Tilt Left or Right").font(.title2.bold())
             Text("to pour \(beaker.displayName) into the reaction vessel")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -129,8 +112,7 @@ struct PourPromptView: View {
                         shakeOffset = 14
                     }
                 }
-            Text("Shake your iPad!")
-                .font(.title2.bold())
+            Text("Shake your iPad!").font(.title2.bold())
             Text("to pour the Yeast catalyst into the reaction vessel")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -140,8 +122,8 @@ struct PourPromptView: View {
 
     private var accentColor: Color {
         switch beaker {
-        case .h2o2:  return .yellow
-        case .soap:  return Color(red: 0.1, green: 0.80, blue: 0.45)
+        case .h2o2: return .yellow
+        case .soap: return Color(red: 0.1, green: 0.80, blue: 0.45)
         case .yeast: return .orange
         }
     }

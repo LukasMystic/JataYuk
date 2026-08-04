@@ -2,9 +2,7 @@
 //  ReactionViewModel.swift
 //  JataYuk
 //
-//  ViewModel — single source of truth for the experiment state.
-//  Drives motion detection (tilt for H₂O₂/Soap, shake for Yeast) and
-//  publishes state changes consumed by both SwiftUI views and ARViewCoordinator.
+//  Created by Stanley Pratama Teguh on 04/08/26.
 //
 
 import Foundation
@@ -13,33 +11,22 @@ import Combine
 
 final class ReactionViewModel: ObservableObject {
 
-    // MARK: - Published State
-
-    @Published var isPlaced: Bool = false
+    @Published var isPlaced = false
     @Published var selectedBeaker: BeakerType? = nil
     @Published var pouredIngredients: Set<BeakerType> = []
     @Published var reactionState: ReactionState = .idle
-    @Published var isPouring: Bool = false
-
-    /// Set in confirmPour() before isPouring flips true so the AR coordinator
-    /// knows which entity to animate.
+    @Published var isPouring = false
     @Published private(set) var lastPouredBeaker: BeakerType? = nil
-
-    /// Volume of each liquid (0.1–1.0). Scales the eruption magnitude.
     @Published var h2o2Amount: Double = 0.5
     @Published var soapAmount: Double = 0.5
 
-    /// Signals the AR scene to reset all entities.
     let resetPublisher = PassthroughSubject<Void, Never>()
 
-    // Yeast is locked until both H₂O₂ and Soap have been poured.
     var isYeastLocked: Bool {
         !pouredIngredients.contains(.h2o2) || !pouredIngredients.contains(.soap)
     }
 
     var foamSegments: Int { Int(10 + (h2o2Amount + soapAmount) * 13) }
-
-    // MARK: - Beaker Interaction
 
     func selectBeaker(_ type: BeakerType) {
         guard !isPouring, !pouredIngredients.contains(type) else { return }
@@ -83,14 +70,14 @@ final class ReactionViewModel: ObservableObject {
         resetPublisher.send()
     }
 
-    // MARK: - CoreMotion
+    // MARK: - Motion
 
     private let motionManager = CMMotionManager()
     private var lastGestureDate: Date = .distantPast
     private var selectionDate: Date = .distantPast
     private var baselineGravityX: Double? = nil
-    private let tiltDelta: Double = 0.38           // required delta from baseline (~22°)
-    private let shakeThreshold: Double = 1.60      // g-force units
+    private let tiltDelta = 0.38
+    private let shakeThreshold = 1.60
     private let gestureDebounce: TimeInterval = 0.7
     private let pickupGracePeriod: TimeInterval = 0.9
 
@@ -103,9 +90,7 @@ final class ReactionViewModel: ObservableObject {
         }
     }
 
-    func stopMotionDetection() {
-        motionManager.stopDeviceMotionUpdates()
-    }
+    func stopMotionDetection() { motionManager.stopDeviceMotionUpdates() }
 
     private func processMotion(_ motion: CMDeviceMotion) {
         guard let selected = selectedBeaker, !isPouring else { return }
@@ -124,28 +109,15 @@ final class ReactionViewModel: ObservableObject {
             let a = motion.userAcceleration
             triggered = (a.x*a.x + a.y*a.y + a.z*a.z) > shakeThreshold * shakeThreshold
         } else {
-            let delta = motion.gravity.x - (baselineGravityX ?? 0)
-            triggered = abs(delta) > tiltDelta
+            triggered = abs(motion.gravity.x - (baselineGravityX ?? 0)) > tiltDelta
         }
 
-        if triggered {
-            lastGestureDate = now
-            confirmPour()
-        }
+        if triggered { lastGestureDate = now; confirmPour() }
     }
-
-    // MARK: - Private
 
     private func updateReactionState() {
         let p = pouredIngredients
-        if p.contains(.yeast) {
-            if p.contains(.h2o2) && p.contains(.soap) {
-                reactionState = .success
-            } else if p.contains(.h2o2) {
-                reactionState = .failed
-            }
-        } else if !p.isEmpty {
-            reactionState = .mixing
-        }
+        guard p.contains(.yeast) else { if !p.isEmpty { reactionState = .mixing }; return }
+        reactionState = (p.contains(.h2o2) && p.contains(.soap)) ? .success : .failed
     }
 }

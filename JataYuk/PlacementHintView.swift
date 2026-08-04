@@ -2,7 +2,7 @@
 //  PlacementHintView.swift
 //  JataYuk
 //
-//  View — pulsing overlay shown before the AR scene is placed.
+//  Created by Stanley Pratama Teguh on 04/08/26.
 //
 
 import SwiftUI

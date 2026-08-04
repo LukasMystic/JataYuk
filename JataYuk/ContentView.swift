@@ -2,8 +2,7 @@
 //  ContentView.swift
 //  JataYuk
 //
-//  View — root SwiftUI view. Composes the AR container, placement hint,
-//  pour prompt overlay, and status panel into a single ZStack.
+//  Created by Stanley Pratama Teguh on 04/08/26.
 //
 
 import SwiftUI
