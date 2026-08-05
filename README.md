@@ -60,3 +60,65 @@ View → Action → Reducer ──→ update State → re-render View
 
 > PoC branch: see `PoC` for the working AR prototype (MVVM).
 > This `main` branch is the clean slate for the TCA rewrite.
+
+---
+
+## GitHub Collaboration Rules
+
+### Branch Protection — `main`
+
+- **Never push directly to `main`** — all changes go through a Pull Request
+- **Require at least 1 approval** before merging
+- **Dismiss stale reviews** — new commits invalidate previous approvals
+- **Branch must be up to date** with `main` before merging
+- Only leads / admins can force-merge in an emergency
+
+### Branch Naming
+
+```
+feature/<what-youre-building>      feature/experiment-ar-placement
+fix/<what-youre-fixing>            fix/tilt-detection-threshold
+chore/<maintenance-task>           chore/update-readme
+refactor/<what-youre-changing>     refactor/tca-experiment-feature
+```
+
+### Commit Message Convention
+
+```
+feat: add yeast shake gesture
+fix: tilt fires immediately on pickup
+refactor: split coordinator into separate file
+chore: update gitignore
+style: clean up comments and headers
+```
+
+### Pull Request Rules
+
+- PR title must follow the commit convention above
+- Reference the related issue: `Closes #12`
+- Keep PRs small and focused — one feature or fix per PR
+- No self-merging — you cannot approve your own PR
+- Must build without errors before requesting review
+
+### Issues & Tasks
+
+- Create a GitHub Issue before starting any work
+- Assign every issue to a specific person — no orphan work
+- Use labels: `feature` `bug` `chore` `refactor` `discussion`
+
+### What NOT to Do
+
+- Never commit directly to `main` or `PoC`
+- Never commit API keys, secrets, or `.env` files
+- Never commit `DerivedData/`, `.DS_Store`, or `xcuserdata/`
+- Never merge your own PR without a review
+
+### Recommended `.gitignore`
+
+```
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.DS_Store
+*.moved-aside
+```
