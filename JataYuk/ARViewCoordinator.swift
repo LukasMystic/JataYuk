@@ -10,12 +10,12 @@ import RealityKit
 import ARKit
 import Combine
 
-
 final class ARViewCoordinator: NSObject {
 
     weak var arView: ARView?
     private let viewModel: ReactionViewModel
     private var cancellables = Set<AnyCancellable>()
+    private var sceneUpdateSubscription: Cancellable?
 
     private var mainAnchor: AnchorEntity?
     private var beakerEntities: [BeakerType: Entity] = [:]
@@ -25,6 +25,13 @@ final class ARViewCoordinator: NSObject {
     private var bubbleContainer: Entity?
     private var originalPositions: [BeakerType: SIMD3<Float>] = [:]
     private var previousSelected: BeakerType? = nil
+
+    /// The SPH foam simulation, created fresh on each successful reaction.
+    private var foamSystem: FoamSPHSystem?
+
+    /// Reaction vessel dimensions — must match `makeReactionVessel` so the SPH
+    /// walls line up with the transparent cylinder the user sees.
+    private let vesselGeometry = ContainerGeometry(radius: 0.041, height: 0.146)
 
     // Layout: [H2O2] [VESSEL] [SOAP]  /  [YEAST] at back
     private let sourcePositions: [BeakerType: SIMD3<Float>] = [
@@ -64,6 +71,14 @@ final class ARViewCoordinator: NSObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.resetScene() }
             .store(in: &cancellables)
+
+        // Per-frame driver for the SPH simulation. No-ops until foam is running.
+        if let arView {
+            sceneUpdateSubscription = arView.scene
+                .subscribe(to: SceneEvents.Update.self) { [weak self] event in
+                    self?.foamSystem?.update(dt: Float(event.deltaTime))
+                }
+        }
     }
 
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
@@ -274,7 +289,7 @@ final class ARViewCoordinator: NSObject {
         switch state {
         case .idle, .mixing: break
         case .failed:  triggerFizzEffect()
-        case .success: triggerFoamExplosion()
+        case .success: startFoamSimulation()
         }
     }
 
@@ -310,81 +325,45 @@ final class ARViewCoordinator: NSObject {
 
     private func removeBubbles() { bubbleContainer?.removeFromParent(); bubbleContainer = nil }
 
-    private func triggerFoamExplosion() {
+    /// Replaces the old rigid-body `triggerFoamExplosion`. Builds a container
+    /// entity at the vessel, creates a fresh SPH system, and hands it a
+    /// FoamModel derived from the current slider values. The per-frame scene
+    /// subscription then steps it every frame.
+    private func startFoamSimulation() {
         guard let anchor = mainAnchor else { return }
         playSound(named: "eruption")
         removeBubbles(); removeFoam()
 
-        let group = Entity()
-        group.position = reactionPosition
-        foamContainer = group
-        anchor.addChild(group)
+        let container = Entity()
+        container.position = reactionPosition   // SPH local origin = vessel base on the plane
+        foamContainer = container
+        anchor.addChild(container)
 
-        let intensity = Float((viewModel.h2o2Amount + viewModel.soapAmount) / 2.0)
-
-        // phase 1 — column
-        for i in 0..<8 {
-            let r: Float = 0.055 - Float(i) * 0.004
-            let up: Float = 3.2 + Float(i) * 0.45 + intensity * 1.5 + Float.random(in: 0...0.3)
-            let sx: Float = Float.random(in: -0.07...0.07), sz: Float = Float.random(in: -0.07...0.07)
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.065) { [weak group] in
-                guard let group else { return }
-                let ball = ModelEntity(mesh: MeshResource.generateSphere(radius: r),
-                                       materials: [SimpleMaterial(color: UIColor(white: 0.98, alpha: 1), roughness: 0.84, isMetallic: false)])
-                ball.position = [0, 0.16, 0]
-                ball.components.set(CollisionComponent(shapes: [.generateSphere(radius: r)]))
-                ball.components.set(PhysicsBodyComponent(massProperties: .default, material: .generate(friction: 0.45, restitution: 0.22), mode: .dynamic))
-                ball.components.set(PhysicsMotionComponent(linearVelocity: [sx, up, sz]))
-                group.addChild(ball)
-            }
-        }
-
-        // phase 2 — overflow
-        let overflowCount = Int(14 + intensity * 18)
-        for i in 0..<overflowCount {
-            let frac = Float(i) / Float(max(1, overflowCount - 1))
-            let r: Float = Float.random(in: 0.018...0.044) * (1.0 - frac * 0.4)
-            let angle = Float.random(in: 0...(2 * .pi))
-            let out: Float = Float.random(in: 0.15...1.3) * (1 + intensity * 0.9)
-            let up: Float  = Float.random(in: 1.4...3.8) * (0.8 + intensity * 0.5)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.30 + Double(i) * 0.055) { [weak group] in
-                guard let group else { return }
-                let ball = ModelEntity(
-                    mesh: MeshResource.generateSphere(radius: r),
-                    materials: [SimpleMaterial(color: UIColor(white: Double(Float.random(in: 0.93...1.0)), alpha: 1), roughness: 0.82, isMetallic: false)]
-                )
-                ball.position = [0, 0.15, 0]
-                ball.components.set(CollisionComponent(shapes: [.generateSphere(radius: r)]))
-                ball.components.set(PhysicsBodyComponent(massProperties: .default, material: .generate(friction: 0.5, restitution: 0.12), mode: .dynamic))
-                ball.components.set(PhysicsMotionComponent(linearVelocity: [cos(angle) * out, up, sin(angle) * out]))
-                group.addChild(ball)
-            }
-        }
-
-        // phase 3 — droplets
-        let dropColor = reactionColor(for: viewModel.pouredIngredients)
-        let dropCount = Int(30 + intensity * 30)
-        for i in 0..<dropCount {
-            let r: Float = Float.random(in: 0.006...0.013)
-            let angle = Float.random(in: 0...(2 * .pi))
-            let out: Float = Float.random(in: 0.4...4.2) * (0.7 + intensity * 0.9)
-            let up: Float  = Float.random(in: 0.6...4.8) * (0.7 + intensity * 0.7)
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.028) { [weak group] in
-                guard let group else { return }
-                let drop = ModelEntity(mesh: MeshResource.generateSphere(radius: r),
-                                       materials: [SimpleMaterial(color: dropColor, roughness: 0.12, isMetallic: false)])
-                drop.position = [0, 0.14, 0]
-                drop.components.set(CollisionComponent(shapes: [.generateSphere(radius: r)]))
-                drop.components.set(PhysicsBodyComponent(massProperties: .default, material: .generate(friction: 0.08, restitution: 0.62), mode: .dynamic))
-                drop.components.set(PhysicsMotionComponent(linearVelocity: [cos(angle) * out, up, sin(angle) * out]))
-                group.addChild(drop)
-            }
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) { [weak self] in self?.removeFoam() }
+        let system = FoamSPHSystem(container: container, geometry: vesselGeometry)
+        system.start(model: makeFoamModel())
+        foamSystem = system
     }
 
-    private func removeFoam() { foamContainer?.removeFromParent(); foamContainer = nil }
+    /// Maps the five chemistry sliders onto the (unmodified) FoamModel. This is
+    /// the seam between the UI and the chemistry.
+    private func makeFoamModel() -> FoamModel {
+        var m = FoamModel()
+        m.concentration = Double(viewModel.concentration)        // 3, 6, 9 %
+        m.volumeL       = Double(viewModel.volumeML) / 1000.0    // mL → litres
+        m.soapTbsp      = Double(viewModel.soapTbsp)             // 1…5 tbsp
+        m.yeastTbsp     = Double(viewModel.yeastTbsp)            // 1…5 tbsp
+        m.tempC         = Double(viewModel.temperatureC)         // 20…50 °C
+        m.containerRadiusCm = Double(vesselGeometry.radius) * 100
+        m.containerVolumeL  = vesselGeometry.volumeLitres
+        return m
+    }
+
+    private func removeFoam() {
+        foamSystem?.reset()
+        foamSystem = nil
+        foamContainer?.removeFromParent()
+        foamContainer = nil
+    }
 
     private func resetScene() {
         removeBubbles(); removeFoam()

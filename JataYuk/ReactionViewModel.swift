@@ -20,6 +20,13 @@ final class ReactionViewModel: ObservableObject {
     @Published var h2o2Amount: Double = 0.5
     @Published var soapAmount: Double = 0.5
 
+    // MARK: - Chemistry inputs (drive FoamModel; set via the sliders panel)
+    @Published var concentration: Int = 6    // % w/v   (3, 6, 9)
+    @Published var volumeML: Int      = 100  // mL      (100…500)
+    @Published var soapTbsp: Int      = 1    // tbsp    (1…5)
+    @Published var yeastTbsp: Int     = 1    // tbsp    (1…5)
+    @Published var temperatureC: Int  = 30   // °C      (20…50)
+
     let resetPublisher = PassthroughSubject<Void, Never>()
 
     var isYeastLocked: Bool {
@@ -66,6 +73,9 @@ final class ReactionViewModel: ObservableObject {
         isPouring = false
         h2o2Amount = 0.5
         soapAmount = 0.5
+        // Chemistry sliders keep their values across a reset so the user can
+        // rerun the same recipe; comment these back in to reset them too:
+        // concentration = 6; volumeML = 100; soapTbsp = 1; yeastTbsp = 1; temperatureC = 30
         baselineGravityX = nil
         resetPublisher.send()
     }
