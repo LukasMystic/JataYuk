@@ -23,9 +23,15 @@ final class FoamSPHSystem {
     private var emitter: ParticleEmitter?
     private var model: FoamModel?
 
-    private var spherePool: [ModelEntity] = []
-    private let sphereMesh: MeshResource
-    private let sphereMaterial: RealityKit.Material
+    // Surface rendering: one mesh entity for the whole foam, rebuilt from the
+    // particles each frame via Marching Cubes (see FoamSurfaceBuilder).
+    private let surfaceBuilder = FoamSurfaceBuilder()
+    private let surfaceEntity = ModelEntity()
+    private let surfaceMaterial: RealityKit.Material
+    /// Rebuild the (costly) surface mesh every N frames; positions between
+    /// rebuilds barely change at 60 fps, so this halves the meshing cost.
+    private let rebuildEvery = 2
+    private var frameCounter = 0
 
     private var elapsed: Double = 0
     private var running = false
@@ -41,16 +47,18 @@ final class FoamSPHSystem {
         self.geometry = geometry
         self.solver = SPHSolver(config: SPHSolver.Config(), geometry: geometry)
 
-        sphereMesh = .generateSphere(radius: 0.012)
-        // White, matte foam with a slight wet sheen. Opaque so stacked particles
-        // read clearly (no transparency sorting artifacts).
+        // White, matte foam skin with a faint wet sheen. faceCulling = .none so
+        // the open underside of the blob (at the floor) never shows holes.
         var mat = PhysicallyBasedMaterial()
         mat.baseColor = .init(tint: UIColor(white: 0.98, alpha: 1.0))
-        mat.roughness = 0.6          // matte, foamy — not glassy
+        mat.roughness = 0.55
         mat.metallic = 0.0
-        mat.clearcoat = 0.3          // faint wet highlight
-        mat.blending = .opaque
-        sphereMaterial = mat
+        mat.clearcoat = 0.3
+        mat.faceCulling = .none
+        surfaceMaterial = mat
+
+        surfaceEntity.isEnabled = false
+        container.addChild(surfaceEntity)
     }
 
     /// Begin a run for the given chemistry model. Clears any previous particles.
@@ -61,7 +69,10 @@ final class FoamSPHSystem {
                                        particleMass: solver.config.particleMass,
                                        maxParticles: solver.config.maxParticles)
         solver.clear()
-        hideAllSpheres()
+        solver.runtimeViscosity = solver.config.viscosity   // reset thickness for the new run
+        solver.runtimeCohesion = solver.config.cohesion
+        surfaceEntity.isEnabled = false
+        frameCounter = 0
         elapsed = 0
         stopTime = model.decayTime(to: 0.15) + 6.0   // + settle time
         running = true
@@ -81,11 +92,19 @@ final class FoamSPHSystem {
                 let vigor = Float(min(2.0, max(0.4, model.rate / 0.345)))
                 solver.gasLift = 12 + 6 * vigor                     // gentle → lifts as a body, doesn't fling apart
                 let plume = Float(model.height(at: elapsed) / 100.0) // cm → m, chemistry-driven
-                solver.liftCeiling = geometry.height + max(0.12, plume)
+                solver.liftCeiling = geometry.height + max(0.25, plume)
             } else {
                 solver.gasLift = 0
                 solver.liftCeiling = 0
             }
+
+            // Time-based rheology: thick early so the foam STACKS into a mound,
+            // then gradually thinner so it slowly OOZES to the sides. Starts
+            // after the eruption (reactionDuration) and eases over `relaxSpan`.
+            let relaxSpan = 12.0
+            let k = Float(max(0, min(1, (elapsed - model.reactionDuration) / relaxSpan)))
+            solver.runtimeCohesion  = solver.config.cohesion  * (1 - 0.20 * k)  // stays thick → keeps stacking
+            solver.runtimeViscosity = solver.config.viscosity * (1 - 0.20 * k)  // only slightly runnier
         }
         // 1. Chemistry decides how many new particles and how fast (new only).
         solver.add(emitter.newParticles(at: elapsed, currentCount: solver.count))
@@ -93,47 +112,33 @@ final class FoamSPHSystem {
         // 2. SPH owns all motion from here on.
         solver.update(dt: dt)
 
-        // 3. Mirror particle positions onto the sphere pool.
-        syncSpheres()
+        // 3. Rebuild the foam surface mesh from the particles (throttled).
+        frameCounter += 1
+        if frameCounter % rebuildEvery == 0 { syncSurface() }
 
         // 4. Freeze once foam has decayed and settled (leaves the puddle visible).
         if elapsed >= stopTime { running = false }
     }
 
-    /// Stop and clear everything (Reset). Spheres are hidden and reused later.
+    /// Stop and clear everything (Reset).
     func reset() {
         running = false
         solver.clear()
         emitter = nil
         model = nil
         elapsed = 0
-        hideAllSpheres()
+        surfaceEntity.isEnabled = false
     }
 
     // MARK: - Rendering
 
-    private func syncSpheres() {
-        let particles = solver.particles
-        ensurePool(count: particles.count)
-        for i in spherePool.indices {
-            if i < particles.count {
-                spherePool[i].isEnabled = true
-                spherePool[i].position = particles[i].position
-            } else {
-                spherePool[i].isEnabled = false
-            }
+    /// Regenerate the single foam mesh from the current particle cloud. Marching
+    /// Cubes turns the overlapping particle "bumps" into one connected surface.
+    private func syncSurface() {
+        guard let mesh = surfaceBuilder.buildMesh(from: solver.particles) else {
+            return   // keep the last surface instead of blinking off
         }
+        surfaceEntity.model = ModelComponent(mesh: mesh, materials: [surfaceMaterial])
+        surfaceEntity.isEnabled = true
     }
-
-    /// Grow the sphere pool on demand, cloning a shared mesh + material.
-    private func ensurePool(count: Int) {
-        while spherePool.count < count {
-            let sphere = ModelEntity(mesh: sphereMesh, materials: [sphereMaterial])
-            sphere.isEnabled = false
-            container.addChild(sphere)
-            spherePool.append(sphere)
-        }
-    }
-
-    private func hideAllSpheres() { spherePool.forEach { $0.isEnabled = false } }
 }

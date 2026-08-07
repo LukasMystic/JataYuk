@@ -53,7 +53,7 @@ struct FoamSlidersView: View {
             .foregroundStyle(.secondary)
 
             IntSliderRow(title: "H₂O₂ concentration", unit: "%",
-                         value: $viewModel.concentration, range: 3...9, step: 3)
+                         value: $viewModel.concentration, range: 3...7, step: 2)
             IntSliderRow(title: "H₂O₂ amount", unit: "mL",
                          value: $viewModel.volumeML, range: 100...500, step: 100)
             IntSliderRow(title: "Dish soap", unit: "tbsp",

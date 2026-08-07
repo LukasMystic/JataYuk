@@ -44,8 +44,12 @@ final class SPHSolver {
         var xsph: Float            = 0.3   // XSPH velocity smoothing → laminar, coherent flow (0 = off)
         var gravity: SIMD3<Float>  = [0, -2.0, 0]  // enough to keep foam settling as a mass (was -0.5 → floated apart)
         var linearDamping: Float   = 2.0    // STRONG → stops in place, stacks (was 0.4)
-        var restitution: Float     = 0.03   // no bounce
+        var restitution: Float     = 0.0    // zero bounce off floor/walls
         var friction: Float        = 0.8    // grippy, doesn't slide apart
+        var yieldSpeed: Float      = 0.06   // below this speed the foam "sets" (yield stress)
+        var restFriction: Float    = 0.2    // lateral velocity kept once set (low → locks a heap in place)
+        var floorContactBand: Float   = 0.01  // height above the floor where bounce is absorbed
+        var floorContactDamping: Float = 0.6  // vertical velocity kept in that band (low → less bounce)
         var maxSpeed: Float        = 1.6   // calmer → less splashy, more laminar
         var collisionRadius: Float = 0.006
         var substeps: Int          = 4      // +1 for stability under the stronger forces
@@ -73,6 +77,11 @@ final class SPHSolver {
     /// Top of the lift column (world y). Particles below this and inside the
     /// cylinder radius get pushed up; above it, gravity takes over.
     var liftCeiling: Float = 0
+    /// Runtime-overridable viscosity & cohesion. The driver keeps these high
+    /// early (foam stacks into a mound) then lowers them over time so the heap
+    /// slowly relaxes and oozes to the sides. Initialised from Config.
+    var runtimeViscosity: Float = 0
+    var runtimeCohesion: Float = 0
 
     init(config: Config, geometry: ContainerGeometry) {
         self.config = config
@@ -84,6 +93,9 @@ final class SPHSolver {
         poly6Coeff     = 315.0 / (64.0 * .pi * pow(h, 9))
         spikyGradCoeff = -45.0 / (.pi * pow(h, 6))
         viscLapCoeff   =  45.0 / (.pi * pow(h, 6))
+
+        runtimeViscosity = config.viscosity
+        runtimeCohesion = config.cohesion
     }
 
     /// Append newly emitted particles, respecting the hard cap.
@@ -194,13 +206,13 @@ final class SPHSolver {
 
                 // Viscosity — Laplacian pulls velocities together.
                 let lap = self.viscLapCoeff * (self.h - r)
-                fViscosity += self.config.viscosity * m *
+                fViscosity += self.runtimeViscosity * m *
                               (particles[j].velocity - vi) / densJ * lap
 
                 // Cohesion — Poly6-weighted pull toward neighbours.
                 let x = self.h2 - r2
                 let w = self.poly6Coeff * x * x * x
-                fCohesion += -self.config.cohesion * m * rvec * w
+                fCohesion += -self.runtimeCohesion * m * rvec * w
             }
 
             let densI = max(particles[i].density, 1e-5)
@@ -213,6 +225,10 @@ final class SPHSolver {
     /// velocity for position. Damping + speed clamp keep the foam calm.
     private func integrate(_ dt: Float) {
         let damp = max(0, 1 - config.linearDamping * dt)
+        // Foam counts as "resting" when its acceleration is well below free fall
+        // (its support balances gravity). Airborne foam accelerates at ~|gravity|,
+        // so this cleanly tells resting from falling — speed alone cannot.
+        let restAccel = simd_length(config.gravity) * 0.6
         for i in particles.indices {
             var a = particles[i].acceleration
             let p0 = particles[i].position
@@ -235,6 +251,17 @@ final class SPHSolver {
             let speed = simd_length(v)
             if speed > config.maxSpeed { v *= config.maxSpeed / speed }
 
+            // Yield / static friction: once foam has nearly stopped, freeze its
+            // LATERAL motion so a pile HOLDS its shape and stacks, instead of
+            // slowly creeping flat. Vertical settling is left alone. This is the
+            // yield stress real foam has and a plain SPH fluid lacks.
+            // Full sleep — but ONLY when resting (slow AND forces balanced), so a
+            // stacked pile holds its shape without flattening, while airborne foam
+            // keeps falling and never freezes in mid-air.
+            if speed < config.yieldSpeed && simd_length(a) < restAccel {
+                v *= config.restFriction
+            }
+
             var p = p0 + v * dt
             resolveCollisions(position: &p, velocity: &v)
 
@@ -254,14 +281,15 @@ final class SPHSolver {
                                    velocity v: inout SIMD3<Float>) {
         let r = config.collisionRadius
 
-        // Floor.
+        // Floor. Clamp, then absorb vertical motion in a thin contact band so the
+        // SPH pressure kick can't rebound the foam — it settles instead of bouncing.
         if p.y < r {
             p.y = r
-            if v.y < 0 {
-                v.y = -v.y * config.restitution
-                v.x *= (1 - config.friction)
-                v.z *= (1 - config.friction)
-            }
+            if v.y < 0 { v.y = -v.y * config.restitution }  // no penetration (restitution 0 → 0)
+            v.x *= (1 - config.friction)
+            v.z *= (1 - config.friction)
+        } else if p.y < r + config.floorContactBand {
+            v.y *= config.floorContactDamping               // soak up the pressure bounce near the floor
         }
 
         // Cylinder wall, only where the wall physically exists (below the rim).
