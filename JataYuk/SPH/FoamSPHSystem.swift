@@ -92,7 +92,7 @@ final class FoamSPHSystem {
                 let vigor = Float(min(2.0, max(0.4, model.rate / 0.345)))
                 solver.gasLift = 12 + 6 * vigor                     // gentle → lifts as a body, doesn't fling apart
                 let plume = Float(model.height(at: elapsed) / 100.0) // cm → m, chemistry-driven
-                solver.liftCeiling = geometry.height + max(0.25, plume)
+                solver.liftCeiling = geometry.height + max(0.001, plume)
             } else {
                 solver.gasLift = 0
                 solver.liftCeiling = 0

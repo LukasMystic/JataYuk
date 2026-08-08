@@ -25,16 +25,24 @@ final class FoamSurfaceBuilder {
 
     /// Voxel edge length in metres. Smaller = smoother + more detail, but cost
     /// grows with the cube of resolution. ~1 cm is a good phone compromise.
-    var cellSize: Float = 0.015
+    var cellSize: Float = 0.01
     /// How far each particle's "bump" reaches. Larger = blobbier / more merged,
     /// and thin/spread foam still forms a surface instead of vanishing.
-    var influenceRadius: Float = 0.05
+    var influenceRadius: Float = 0.075
     /// Surface threshold. The mesh is drawn where the summed field crosses this.
     /// Lower → fatter foam that survives spreading; higher → thinner but can
-    /// disappear once the foam thins out. Tune together with influenceRadius.
-    var isoLevel: Float = 0.2
+    /// disappear once the foam thins out. NOTE: values > ~1 make sparse foam
+    /// vanish, because a spread-out plume never builds enough field to cross it.
+    var isoLevel: Float = 0.3
     /// Hard cap on grid cells per axis, so a big splash can't blow up the cost.
     var maxGridDim: Int = 48
+    /// Laplacian smoothing passes over the finished mesh — relax each vertex
+    /// toward its neighbours' average to soften the faceted marching-cubes look
+    /// into a rounder skin. Cheaper than a finer grid. 0 = off.
+    var smoothingIterations: Int = 2
+    /// How far each vertex moves toward the neighbour average per pass (0…1).
+    /// Higher = smoother but shrinks/rounds the shape more.
+    var smoothingFactor: Float = 0.5
 
     /// Build a mesh from the current particles, or nil if there's nothing to show.
     func buildMesh(from particles: [Particle]) -> MeshResource? {
@@ -188,6 +196,33 @@ final class FoamSurfaceBuilder {
         }
 
         guard positions.count >= 3, indices.count >= 3 else { return nil }
+
+        // --- 4b. Laplacian smoothing: relax each vertex toward its neighbours'
+        // average, melting the faceted marching-cubes surface into a rounder,
+        // softer skin (round balls that merge smoothly) without a finer grid. ---
+        if smoothingIterations > 0 {
+            var neighbours = [[UInt32]](repeating: [], count: positions.count)
+            var e = 0
+            while e < indices.count {
+                let a = indices[e], b = indices[e + 1], c = indices[e + 2]
+                neighbours[Int(a)].append(b); neighbours[Int(a)].append(c)
+                neighbours[Int(b)].append(a); neighbours[Int(b)].append(c)
+                neighbours[Int(c)].append(a); neighbours[Int(c)].append(b)
+                e += 3
+            }
+            for _ in 0..<smoothingIterations {
+                var moved = positions
+                for v in positions.indices {
+                    let nb = neighbours[v]
+                    if nb.isEmpty { continue }
+                    var avg = SIMD3<Float>.zero
+                    for n in nb { avg += positions[Int(n)] }
+                    avg /= Float(nb.count)
+                    moved[v] = positions[v] + smoothingFactor * (avg - positions[v])
+                }
+                positions = moved
+            }
+        }
 
         // --- 5. Smooth normals by accumulating face normals onto shared vertices ---
         var normals = [SIMD3<Float>](repeating: .zero, count: positions.count)

@@ -21,7 +21,7 @@ final class ReactionViewModel: ObservableObject {
     @Published var soapAmount: Double = 0.5
 
     // MARK: - Chemistry inputs (drive FoamModel; set via the sliders panel)
-    @Published var concentration: Int = 6    // % w/v   (3, 6, 9)
+    @Published var concentration: Int = 5    // % w/v   (3, 5, 7)
     @Published var volumeML: Int      = 100  // mL      (100…500)
     @Published var soapTbsp: Int      = 1    // tbsp    (1…5)
     @Published var yeastTbsp: Int     = 1    // tbsp    (1…5)

@@ -19,7 +19,13 @@ private struct IntSliderRow: View {
     private var doubleBinding: Binding<Double> {
         Binding(
             get: { Double(value) },
-            set: { value = Int(($0 / Double(step)).rounded()) * step }
+            set: { newValue in
+                // Snap relative to lowerBound, not zero — otherwise a range like
+                // 3…7 step 2 rounds to multiples of 2 (4,6,8) instead of 3,5,7.
+                let steps = ((newValue - Double(range.lowerBound)) / Double(step)).rounded()
+                let snapped = range.lowerBound + Int(steps) * step
+                value = min(range.upperBound, max(range.lowerBound, snapped))
+            }
         )
     }
 

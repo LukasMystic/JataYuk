@@ -23,9 +23,24 @@ final class ParticleEmitter {
     /// count tracks the volume curve linearly.
     private let litresPerParticle: Double
 
-    /// Extra gain on the physical √(2gH) launch speed. Keep < 1 for a gentle,
-    /// foamy eruption; 1.0 is the raw ballistic mapping.
-    var launchVelocityScale: Float = 1.0
+    /// The recipe's peak plume height (cm), used to pick the emission rate.
+    private let peakHeightCm: Double
+
+    /// Extra gain on the √(2gH) launch speed. The formula uses g = 9.81 but the
+    /// sim's gravity is much weaker, so raw launches overshoot — mostly for WEAK
+    /// recipes, whose launch speed is below maxSpeed and so isn't clipped. ~0.5
+    /// tames those sparse-and-too-high plumes; strong recipes are maxSpeed-capped
+    /// anyway, so they're unaffected.
+    var launchVelocityScale: Float = 0.5
+
+    /// Emission speed (× the chemistry's real pace) for SHORT plumes.
+    /// 2.0 = twice the particles/sec, eruption finishes in ~half the time.
+    var emissionRateScale: Double = 2.0
+    /// Emission speed for TALL plumes. Kept slow (1.0 = real pace) so foam is
+    /// still erupting later, once the lift ceiling has grown tall enough to lift
+    /// it — otherwise a tall recipe emits everything early (while the ceiling is
+    /// still low) and stays short. The rate blends between the two by peak height.
+    var tallEmissionRateScale: Double = 1.0
 
     private let gravity: Float = 9.81
 
@@ -38,23 +53,32 @@ final class ParticleEmitter {
         self.particleMass = particleMass
         self.maxParticles = maxParticles
 
-        // Base the budget on the gas portion of the peak (foam above the resting
-        // liquid), so the full particle budget is spent right at peak height.
-        let peakGas = max(model.peakVolumeL - model.liquidL, 1e-4)
-        litresPerParticle = peakGas / Double(maxParticles)
+        // Absolute volume per particle (10 mL): the recipe's foam volume now
+        // controls HOW MANY particles are emitted (up to maxParticles), so
+        // stronger recipes visibly produce more foam. Mid/strong recipes cap out
+        // at maxParticles; weaker recipes come out proportionally smaller.
+        litresPerParticle = 0.01
+        peakHeightCm = model.peakHeightCm
     }
 
     /// Particles to emit this frame, given how many already exist. Emission
     /// follows the *rise* of the volume curve; during collapse the target falls
     /// below the current count, so nothing new is emitted.
     func newParticles(at elapsed: Double, currentCount: Int) -> [Particle] {
-        let gasNow = max(0, model.volume(at: elapsed) - model.liquidL)
+        // Pick emission speed by how TALL this recipe's plume is: short plumes
+        // emit fast (emissionRateScale); tall plumes emit slower (toward
+        // tallEmissionRateScale) so foam is still erupting once the lift ceiling
+        // has grown tall — which is why tall recipes previously stayed short.
+        let tallness = min(1.0, max(0.0, (peakHeightCm - 20.0) / (80.0 - 20.0)))
+        let scale = emissionRateScale + (tallEmissionRateScale - emissionRateScale) * tallness
+        let t = elapsed * scale
+        let gasNow = max(0, model.volume(at: t) - model.liquidL)
         let target = min(maxParticles, Int(gasNow / litresPerParticle))
         guard target > currentCount else { return [] }
 
         // Height → launch speed: the speed needed to ballistically reach the
         // predicted foam height. Height is in cm; convert to metres.
-        let heightM = Float(model.height(at: elapsed) / 100.0)
+        let heightM = Float(model.height(at: t) / 100.0)
         let launch = (2 * gravity * max(heightM, 0)).squareRoot() * launchVelocityScale
 
         var emitted: [Particle] = []

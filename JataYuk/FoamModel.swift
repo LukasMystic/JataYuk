@@ -40,11 +40,34 @@ struct FoamModel {
     var yeastFactor: Double {
         yeastCeiling * yeastTbsp / (yeastTbsp + yeastHalf)
     }
-    /// Q10 doubling times a denaturation sigmoid. Peaks at 43.1 °C.
+    /// Temperature response, shaped so the extremes barely react and the
+    /// transitions near them are sharp:
+    ///   • 20 °C and 50 °C → "very little" (a small floor)
+    ///   • 20→25 °C → linear ramp up from the floor to the formula value at 25
+    ///   • 25→45 °C → the original Q10 × denaturation formula (peaks ~43 °C)
+    ///   • 45→50 °C → linear ramp down from the formula value at 45 to the floor
     var tempFactor: Double {
-        let q10 = pow(2, (tempC - 43) / 10)
-        let denature = 1.2019 / (1 + exp((tempC - 47) / 2.5))
-        return q10 * denature
+        let floorFactor = 0.05   // "very little" at 20 °C and 50 °C
+
+        // Original Q10 doubling × denaturation sigmoid (peaks ~43 °C, ≈1.0).
+        func formula(_ t: Double) -> Double {
+            let q10 = pow(2, (t - 43) / 10)
+            let denature = 1.2019 / (1 + exp((t - 47) / 2.5))
+            return q10 * denature
+        }
+
+        let T = tempC
+        if T <= 20 || T >= 50 {
+            return floorFactor
+        } else if T < 25 {
+            let a = (T - 20) / 5                       // 0 at 20 → 1 at 25
+            return floorFactor + (formula(25) - floorFactor) * a
+        } else if T <= 45 {
+            return formula(T)                          // core: original formula
+        } else {
+            let a = (T - 45) / 5                       // 0 at 45 → 1 at 50
+            return formula(45) + (floorFactor - formula(45)) * a
+        }
     }
     /// Combined rate multiplier.
     var rate: Double { yeastFactor * tempFactor }

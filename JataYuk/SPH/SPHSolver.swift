@@ -39,17 +39,20 @@ final class SPHSolver {
         var particleMass: Float    = 0.0016
         var restDensity: Float     = 1000
         var stiffness: Float       = 30    // LOWER → less explosive side-repulsion (was 80)
-        var viscosity: Float       = 15    // thick → stacks & oozes, doesn't run like water
-        var cohesion: Float        = 4.0   // HIGHER → holds together as one piece (was 0.7)
+        var viscosity: Float       = 12    // thick → stacks & oozes, doesn't run like water
+        var cohesion: Float        = 6.0   // HIGHER → holds together & stacks vertically (was 4.0)
         var xsph: Float            = 0.3   // XSPH velocity smoothing → laminar, coherent flow (0 = off)
-        var gravity: SIMD3<Float>  = [0, -2.0, 0]  // enough to keep foam settling as a mass (was -0.5 → floated apart)
+        var gravity: SIMD3<Float>  = [0, -1.6, 0]  // enough to keep foam settling as a mass (was -0.5 → floated apart)
         var linearDamping: Float   = 2.0    // STRONG → stops in place, stacks (was 0.4)
         var restitution: Float     = 0.0    // zero bounce off floor/walls
         var friction: Float        = 0.8    // grippy, doesn't slide apart
-        var yieldSpeed: Float      = 0.06   // below this speed the foam "sets" (yield stress)
+        var yieldSpeed: Float      = 0.16   // below this speed the foam "sets" — higher → stacks sooner, holds a pile
         var restFriction: Float    = 0.2    // lateral velocity kept once set (low → locks a heap in place)
-        var floorContactBand: Float   = 0.01  // height above the floor where bounce is absorbed
-        var floorContactDamping: Float = 0.6  // vertical velocity kept in that band (low → less bounce)
+        var stackRadius: Float     = 0.12   // within this radius of the beaker foam sets firmly (stacks tall); beyond it spreads flat
+        var topSpread: Float       = 2.0      // horizontal accel added near the plume's apex → it fans out at the top
+        var apexSpeed: Float       = 0.6    // upward-speed window (m/s) that counts as "reaching the top"
+        var floorContactBand: Float   = 0.1  // height above the floor where bounce is absorbed
+        var floorContactDamping: Float = 0.35  // vertical velocity kept in that band (low → less bounce)
         var maxSpeed: Float        = 1.6   // calmer → less splashy, more laminar
         var collisionRadius: Float = 0.006
         var substeps: Int          = 4      // +1 for stability under the stronger forces
@@ -244,6 +247,32 @@ final class SPHSolver {
                 a.y += gasLift * frac
             }
 
+            // Apex spread: when a particle is above the rim and its UPWARD speed
+            // has nearly run out (it's at the top of its arc), push it sideways —
+            // outward plus a random jitter — so the plume fans/mushrooms at the
+            // crown instead of dribbling straight down. Strongest right at the
+            // apex; fades to zero for particles still moving fast up or down.
+            if config.topSpread > 0, p0.y > geometry.height {
+                let vy = particles[i].velocity.y
+                if vy < config.apexSpeed {
+                    let f = max(0, 1 - abs(vy) / config.apexSpeed)   // 1 at apex, → 0 moving fast
+                    let radial = (p0.x * p0.x + p0.z * p0.z).squareRoot()
+                    let ox: Float, oz: Float
+                    if radial > 1e-4 {
+                        ox = p0.x / radial; oz = p0.z / radial        // steady outward direction
+                    } else {
+                        let ang = Float.random(in: 0..<(2 * Float.pi)); ox = cos(ang); oz = sin(ang)
+                    }
+                    let jAng = Float.random(in: 0..<(2 * Float.pi))   // random jitter direction
+                    let mix: Float = 0.6                              // 60% outward, 40% random
+                    // Randomize the strength per particle: 0 … topSpread, so some
+                    // barely drift and others fling out — a scattered, natural fan.
+                    let mag = config.topSpread * f * Float.random(in: 0...1)
+                    a.x += (ox * mix + cos(jAng) * (1 - mix)) * mag
+                    a.z += (oz * mix + sin(jAng) * (1 - mix)) * mag
+                }
+            }
+
             // Semi-implicit Euler: new velocity, then move by it.
             var v = particles[i].velocity + a * dt
             v *= damp
@@ -258,7 +287,13 @@ final class SPHSolver {
             // Full sleep — but ONLY when resting (slow AND forces balanced), so a
             // stacked pile holds its shape without flattening, while airborne foam
             // keeps falling and never freezes in mid-air.
-            if speed < config.yieldSpeed && simd_length(a) < restAccel {
+            // Radial stacking bias: foam sets readily NEAR the beaker (so it
+            // stacks tall) and only weakly FAR from it (so it keeps spreading
+            // flat) → a mound that's tallest at the source and tapers outward.
+            let stackRadial = (p0.x * p0.x + p0.z * p0.z).squareRoot()
+            let nearBeaker = max(0, 1 - stackRadial / config.stackRadius)   // 1 near → 0 far
+            let yieldHere = config.yieldSpeed * (0.3 + 0.7 * nearBeaker)
+            if speed < yieldHere && simd_length(a) < restAccel {
                 v *= config.restFriction
             }
 
