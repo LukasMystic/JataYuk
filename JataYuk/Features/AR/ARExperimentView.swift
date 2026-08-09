@@ -12,8 +12,8 @@ struct ARExperimentView: View {
 
     var body: some View {
         ZStack {
-            // RealityView container goes here
-            Color.black.ignoresSafeArea()
+            ARViewContainer(store: store)
+                .ignoresSafeArea()
 
             VStack {
                 placementStatusView
@@ -43,16 +43,9 @@ struct ARExperimentView: View {
             .cornerRadius(8)
     }
 
-    // Temporary debug controls — remove when real gestures are wired
     private var debugControlsView: some View {
         HStack(spacing: 16) {
-            if store.state.ar.placement != .allPlaced {
-                Button("Next Placement") {
-                    store.send(.ar(.placementAdvanced))
-                }
-                .buttonStyle(.bordered)
-                .tint(.white)
-            } else {
+            if store.state.ar.placement == .allPlaced {
                 Button("End") {
                     store.send(.navigate(to: .end))
                 }
