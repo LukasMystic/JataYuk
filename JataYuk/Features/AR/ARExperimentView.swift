@@ -6,9 +6,14 @@
 //
 
 import SwiftUI
+import CoreMotion
 
 struct ARExperimentView: View {
     @ObservedObject var store: Store<RootState, RootAction>
+
+    #if DEBUG
+    @StateObject private var pitchObserver = PitchObserver()
+    #endif
 
     var body: some View {
         ZStack {
@@ -18,10 +23,16 @@ struct ARExperimentView: View {
             VStack {
                 placementStatusView
                 Spacer()
+                #if DEBUG
+                debugTiltOverlay
+                #endif
                 debugControlsView
             }
             .padding()
         }
+        #if DEBUG
+        .onDisappear { pitchObserver.stop() }
+        #endif
     }
 
     // Temporary placement phase indicator
@@ -60,4 +71,79 @@ struct ARExperimentView: View {
             .tint(.white)
         }
     }
+
+    // MARK: - Debug Tilt Overlay
+
+    #if DEBUG
+    @ViewBuilder
+    private var debugTiltOverlay: some View {
+        if store.state.ar.placement == .allPlaced {
+            let soap = store.state.experiment.stationA.ingredients[3]
+            let isHolding = soap.proximityState == .inHand
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("DEBUG — Tilt Test")
+                    .font(.caption.bold())
+
+                // Live pitch readout — confirm sensor is running
+                Text("Pitch: \(pitchObserver.pitchDeg, specifier: "%.1f")°  (fires pour at >70°)")
+                    .font(.caption.monospaced())
+                    .foregroundColor(pitchObserver.pitchDeg > 70 ? .yellow : .white)
+
+                // Pour progress for soap (index 3 on side A)
+                Text("Soap pours: \(soap.pourCount) / \(Ingredient.maxPours)")
+                    .font(.caption.monospaced())
+
+                // Mixture state advances to .prepared on first pour, .mixed on shake
+                Text("Mixture: \(String(describing: store.state.experiment.stationA.mixingBeaker.mixtureState))")
+                    .font(.caption.monospaced())
+
+                HStack(spacing: 12) {
+                    Button(isHolding ? "Holding ✓" : "Hold Soap") {
+                        store.send(.ar(.pickupIngredient(.sideA, 3)))
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(isHolding ? .green : .yellow)
+                    .disabled(isHolding)
+
+                    Button("Release") {
+                        store.send(.ar(.releaseIngredient(.sideA, 3)))
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.orange)
+                    .disabled(!isHolding)
+                }
+            }
+            .foregroundColor(.white)
+            .padding(10)
+            .background(.ultraThinMaterial)
+            .cornerRadius(10)
+        }
+    }
+    #endif
 }
+
+// MARK: - PitchObserver (debug only)
+
+#if DEBUG
+@MainActor
+private final class PitchObserver: ObservableObject {
+    @Published var pitchDeg: Double = 0
+    private let manager = CMMotionManager()
+
+    init() {
+        guard manager.isDeviceMotionAvailable else { return }
+        manager.deviceMotionUpdateInterval = 1.0 / 10.0
+        manager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
+            guard let motion else { return }
+            Task { @MainActor [weak self] in
+                self?.pitchDeg = abs(motion.attitude.pitch) * 180 / .pi
+            }
+        }
+    }
+
+    func stop() {
+        manager.stopDeviceMotionUpdates()
+    }
+}
+#endif

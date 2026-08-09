@@ -6,12 +6,41 @@
 //
 
 import Foundation
+import CoreMotion
 
-// Stub for the CoreMotion dependency client.
-// Implement in Features/AR once gesture detection is wired up.
-//
-// Responsibilities:
-//   - Tilt detection → .ar(.pourIngredient) when an ingredient is inHand
-//   - Shake detection → .ar(.shakeMixingBeaker) when mixing beaker is highlighted
 struct MotionClient {
+    // Private class so struct copies in RootEnvironment share the same CMMotionManager instance.
+    private let handle = Handle()
+
+    private final class Handle {
+        let manager = CMMotionManager()
+        var tiltFired = false
+    }
+
+    private static let pourThresholdRad = 70.0 * .pi / 180.0
+    private static let resetThresholdRad = 30.0 * .pi / 180.0
+
+    // Monitors device pitch at 30 Hz. Calls onPour once per pour gesture (tilt > 70°).
+    // Resets the gate when the device returns to within 30° of upright so repeated pours work.
+    func startTiltMonitoring(onPour: @MainActor @escaping () -> Void) {
+        guard handle.manager.isDeviceMotionAvailable else { return }
+        handle.manager.deviceMotionUpdateInterval = 1.0 / 30.0
+        let pourThreshold = Self.pourThresholdRad
+        let resetThreshold = Self.resetThresholdRad
+        handle.manager.startDeviceMotionUpdates(to: .main) { [handle] motion, _ in
+            guard let motion else { return }
+            let pitch = abs(motion.attitude.pitch)
+            if pitch > pourThreshold, !handle.tiltFired {
+                handle.tiltFired = true
+                Task { @MainActor in onPour() }
+            } else if pitch < resetThreshold {
+                handle.tiltFired = false
+            }
+        }
+    }
+
+    func stopTiltMonitoring() {
+        handle.manager.stopDeviceMotionUpdates()
+        handle.tiltFired = false
+    }
 }
