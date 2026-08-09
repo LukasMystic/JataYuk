@@ -35,4 +35,8 @@ struct ARViewContainer: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: ARView, context: Context) {}
+
+    static func dismantleUIView(_ uiView: ARView, coordinator: ARCoordinator) {
+        Task { @MainActor in coordinator.stopMotionMonitoring() }
+    }
 }

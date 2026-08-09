@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 import CoreMotion
 
 struct ARExperimentView: View {
@@ -86,9 +87,9 @@ struct ARExperimentView: View {
                     .font(.caption.bold())
 
                 // Live pitch readout — confirm sensor is running
-                Text("Pitch: \(pitchObserver.pitchDeg, specifier: "%.1f")°  (fires pour at >70°)")
+                Text("Pitch: \(pitchObserver.pitchDeg, specifier: "%.1f")°  (fires pour at >45°)")
                     .font(.caption.monospaced())
-                    .foregroundColor(pitchObserver.pitchDeg > 70 ? .yellow : .white)
+                    .foregroundColor(pitchObserver.pitchDeg > 45 ? .yellow : .white)
 
                 // Pour progress for soap (index 3 on side A)
                 Text("Soap pours: \(soap.pourCount) / \(Ingredient.maxPours)")
@@ -126,7 +127,6 @@ struct ARExperimentView: View {
 // MARK: - PitchObserver (debug only)
 
 #if DEBUG
-@MainActor
 private final class PitchObserver: ObservableObject {
     @Published var pitchDeg: Double = 0
     private let manager = CMMotionManager()
@@ -134,11 +134,10 @@ private final class PitchObserver: ObservableObject {
     init() {
         guard manager.isDeviceMotionAvailable else { return }
         manager.deviceMotionUpdateInterval = 1.0 / 10.0
+        // Callback runs on .main queue, so @Published updates land on the right thread.
         manager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
             guard let motion else { return }
-            Task { @MainActor [weak self] in
-                self?.pitchDeg = abs(motion.attitude.pitch) * 180 / .pi
-            }
+            self?.pitchDeg = abs(motion.attitude.pitch) * 180 / .pi
         }
     }
 

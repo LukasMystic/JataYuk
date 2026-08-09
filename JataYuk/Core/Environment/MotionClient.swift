@@ -17,8 +17,8 @@ struct MotionClient {
         var tiltFired = false
     }
 
-    private static let pourThresholdRad = 70.0 * .pi / 180.0
-    private static let resetThresholdRad = 30.0 * .pi / 180.0
+    private static let pourThresholdRad = 45.0 * .pi / 180.0
+    private static let resetThresholdRad = 20.0 * .pi / 180.0
 
     // Monitors device pitch at 30 Hz. Calls onPour once per pour gesture (tilt > 70°).
     // Resets the gate when the device returns to within 30° of upright so repeated pours work.

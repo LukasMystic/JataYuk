@@ -23,8 +23,14 @@ final class ARCoordinator: NSObject {
     private var stationAAnchor: AnchorEntity?
     private var stationBAnchor: AnchorEntity?
 
+    private let motionClient = MotionClient()
+
     init(store: Store<RootState, RootAction>) {
         self.store = store
+    }
+
+    func stopMotionMonitoring() {
+        motionClient.stopTiltMonitoring()
     }
 
     // MARK: - Tap to Place
@@ -42,6 +48,7 @@ final class ARCoordinator: NSObject {
 
         if store.state.ar.placement == .allPlaced {
             hidePlaneVisualizations()
+            startTiltMonitoring()
         }
     }
 
@@ -77,6 +84,27 @@ final class ARCoordinator: NSObject {
             mesh: .generateBox(size: size, cornerRadius: 0.005),
             materials: [SimpleMaterial(color: color.withAlphaComponent(0.85), isMetallic: false)]
         )
+    }
+
+    // MARK: - Tilt / Pour
+
+    private func startTiltMonitoring() {
+        motionClient.startTiltMonitoring { [weak self] in
+            guard let self,
+                  let (side, index) = activePourTarget() else { return }
+            store.send(.ar(.pourIngredient(side, index)))
+        }
+    }
+
+    // Returns the station side and ingredient index that is currently held by the player.
+    private func activePourTarget() -> (StationSide, Int)? {
+        for side in [StationSide.sideA, .sideB] {
+            let station = store.state.experiment[side]
+            for (i, ingredient) in station.ingredients.enumerated() where ingredient.proximityState == .inHand {
+                return (side, i)
+            }
+        }
+        return nil
     }
 
     // MARK: - Plane Visualizations
