@@ -31,6 +31,7 @@ final class ARCoordinator: NSObject {
 
     func stopMotionMonitoring() {
         motionClient.stopTiltMonitoring()
+        motionClient.stopShakeMonitoring()
     }
 
     // MARK: - Tap to Place
@@ -49,6 +50,7 @@ final class ARCoordinator: NSObject {
         if store.state.ar.placement == .allPlaced {
             hidePlaneVisualizations()
             startTiltMonitoring()
+            startShakeMonitoring()
         }
     }
 
@@ -102,6 +104,26 @@ final class ARCoordinator: NSObject {
             let station = store.state.experiment[side]
             for (i, ingredient) in station.ingredients.enumerated() where ingredient.proximityState == .inHand {
                 return (side, i)
+            }
+        }
+        return nil
+    }
+
+    // MARK: - Shake / Mix
+
+    private func startShakeMonitoring() {
+        motionClient.startShakeMonitoring { [weak self] in
+            guard let self,
+                  let side = activeShakerTarget() else { return }
+            store.send(.ar(.shakeMixingBeaker(side)))
+        }
+    }
+
+    // Returns the side whose mixing beaker is currently held by the player.
+    private func activeShakerTarget() -> StationSide? {
+        for side in [StationSide.sideA, .sideB] {
+            if store.state.experiment[side].mixingBeaker.proximityState == .inHand {
+                return side
             }
         }
         return nil

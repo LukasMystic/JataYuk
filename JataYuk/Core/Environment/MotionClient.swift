@@ -71,15 +71,17 @@ struct MotionClient {
 
             // Tilt: pitch > 45° fires pour once; gate resets below 20°
             let pitch = abs(motion.attitude.pitch)
-            if pitch > pourThreshold, !handle.tiltFired {
+            let isTilted = pitch > pourThreshold
+            if isTilted, !handle.tiltFired {
                 handle.tiltFired = true
                 handle.onPour?()
             } else if pitch < resetThreshold {
                 handle.tiltFired = false
             }
 
-            // Shake: userAcceleration > 1.0g fires shake with 1s cooldown
-            guard !handle.shakeCooldown else { return }
+            // Shake: suppressed while device is tilted — tilt motion inherently spikes
+            // userAcceleration above the shake threshold, causing false positives on every pour.
+            guard !isTilted, !handle.shakeCooldown else { return }
             let a = motion.userAcceleration
             let mag = sqrt(a.x * a.x + a.y * a.y + a.z * a.z)
             if mag > shakeThreshold {

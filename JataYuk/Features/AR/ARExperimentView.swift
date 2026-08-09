@@ -109,7 +109,7 @@ struct ARExperimentView: View {
                         store.send(.ar(.pickupIngredient(.sideA, 3)))
                     }
                     .buttonStyle(.bordered).tint(holdingSoap ? .green : .yellow)
-                    .disabled(holdingSoap)
+                    .disabled(holdingSoap || holdingAnyBeaker)   // can't hold both
 
                     Button("Release Soap") {
                         store.send(.ar(.releaseIngredient(.sideA, 3)))
@@ -136,13 +136,13 @@ struct ARExperimentView: View {
                         store.send(.ar(.mixingBeakerProximityChanged(.sideA, .inHand)))
                     }
                     .buttonStyle(.bordered).tint(holdingBeakerA ? .green : .cyan)
-                    .disabled(holdingAnyBeaker)
+                    .disabled(holdingAnyBeaker || holdingSoap)   // can't hold both
 
                     Button(holdingBeakerB ? "Beaker B ✓" : "Hold B") {
                         store.send(.ar(.mixingBeakerProximityChanged(.sideB, .inHand)))
                     }
                     .buttonStyle(.bordered).tint(holdingBeakerB ? .green : .cyan)
-                    .disabled(holdingAnyBeaker)
+                    .disabled(holdingAnyBeaker || holdingSoap)   // can't hold both
 
                     Button("Release") {
                         store.send(.ar(.mixingBeakerProximityChanged(.sideA, .far)))
