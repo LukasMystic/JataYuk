@@ -1,3 +1,10 @@
+//
+//  RootReducer.swift
+//  JataYuk
+//
+//  Created by Stanley Pratama Teguh on 29/07/26.
+//
+
 import Foundation
 
 func rootReducer(state: inout RootState, action: RootAction, environment: RootEnvironment) -> [Effect] {

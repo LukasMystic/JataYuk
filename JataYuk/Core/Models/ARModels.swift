@@ -1,3 +1,10 @@
+//
+//  ARModels.swift
+//  JataYuk
+//
+//  Created by Stanley Pratama Teguh on 29/07/26.
+//
+
 import Foundation
 
 // MARK: - AR Availability
