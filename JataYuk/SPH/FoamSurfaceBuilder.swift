@@ -20,31 +20,38 @@
 import RealityKit
 import simd
 
-/// Builds a smooth iso-surface mesh from SPH particles via Marching Cubes.
+// Builds a smooth iso-surface mesh from SPH particles via Marching Cubes.
 final class FoamSurfaceBuilder {
 
-    /// Voxel edge length in metres. Smaller = smoother + more detail, but cost
-    /// grows with the cube of resolution. ~1 cm is a good phone compromise.
+    // Voxel edge length in metres.
+    //  • Smaller = smoother + more detail, but cost grows with the cube of resolution.
+    //  • ~1 cm is a good phone compromise.
     var cellSize: Float = 0.01
-    /// How far each particle's "bump" reaches. Larger = blobbier / more merged,
-    /// and thin/spread foam still forms a surface instead of vanishing.
-    var influenceRadius: Float = 0.075
-    /// Surface threshold. The mesh is drawn where the summed field crosses this.
-    /// Lower → fatter foam that survives spreading; higher → thinner but can
-    /// disappear once the foam thins out. NOTE: values > ~1 make sparse foam
-    /// vanish, because a spread-out plume never builds enough field to cross it.
+    
+    // How far each particle's "bump" reaches.
+    //  • Larger = blobbier / more merged,
+    //  • and thin/spread foam still forms a surface instead of vanishing.
+    var influenceRadius: Float = 0.07
+    
+    // Surface threshold. The mesh is drawn where the summed field crosses this.
+    //  • Lower → fatter foam that survives spreading;
+    //  • higher → thinner but can disappear once the foam thins out. NOTE: values > ~1 make sparse foam vanish
+    //  • because a spread-out plume never builds enough field to cross it.
     var isoLevel: Float = 0.3
-    /// Hard cap on grid cells per axis, so a big splash can't blow up the cost.
+    
+    // Hard cap on grid cells per axis, so a big splash can't blow up the cost.
     var maxGridDim: Int = 48
-    /// Laplacian smoothing passes over the finished mesh — relax each vertex
-    /// toward its neighbours' average to soften the faceted marching-cubes look
-    /// into a rounder skin. Cheaper than a finer grid. 0 = off.
+    
+    // Laplacian smoothing passes over the finished mesh
+    //  • relax each vertex toward its neighbours' average to soften the faceted marching-cubes look into a rounder skin.
+    //  • Cheaper than a finer grid. 0 = off.
     var smoothingIterations: Int = 2
-    /// How far each vertex moves toward the neighbour average per pass (0…1).
-    /// Higher = smoother but shrinks/rounds the shape more.
+    
+    // How far each vertex moves toward the neighbour average per pass (0…1).
+    //  • Higher = smoother but shrinks/rounds the shape more.
     var smoothingFactor: Float = 0.5
 
-    /// Build a mesh from the current particles, or nil if there's nothing to show.
+    // Build a mesh from the current particles, or nil if there's nothing to show.
     func buildMesh(from particles: [Particle]) -> MeshResource? {
         guard particles.count >= 4 else { return nil }
 
@@ -110,9 +117,9 @@ final class FoamSurfaceBuilder {
         // --- 4. Marching Cubes over every cell (8 corners) ---
         var positions: [SIMD3<Float>] = []
         var indices: [UInt32] = []
-        // Reuse a vertex when two neighbouring cells share the same edge, so the
-        // surface is watertight and can be smooth-shaded. Key = the two corner
-        // grid-indices that the interpolated vertex sits between.
+        // Reuse a vertex when two neighbouring cells share the same edge,
+        //  • so the surface is watertight and can be smooth-shaded.
+        //  • Key = the two corner grid-indices that the interpolated vertex sits between.
         var edgeVertexCache: [Int64: UInt32] = [:]
 
         @inline(__always) func cornerPos(_ x: Int, _ y: Int, _ z: Int) -> SIMD3<Float> {
@@ -197,9 +204,9 @@ final class FoamSurfaceBuilder {
 
         guard positions.count >= 3, indices.count >= 3 else { return nil }
 
-        // --- 4b. Laplacian smoothing: relax each vertex toward its neighbours'
-        // average, melting the faceted marching-cubes surface into a rounder,
-        // softer skin (round balls that merge smoothly) without a finer grid. ---
+        // --- 4b. Laplacian smoothing: relax each vertex toward its neighbours' average,
+        //  • melting the faceted marching-cubes surface into a rounder, softer skin
+        //  • (round balls that merge smoothly) without a finer grid. ---
         if smoothingIterations > 0 {
             var neighbours = [[UInt32]](repeating: [], count: positions.count)
             var e = 0
@@ -248,8 +255,7 @@ final class FoamSurfaceBuilder {
 
     // MARK: - Marching Cubes lookup tables (Paul Bourke, public domain)
 
-    /// For each of the 256 corner in/out combinations, a 12-bit mask of which
-    /// edges the surface crosses.
+    // For each of the 256 corner in/out combinations, a 12-bit mask of which edges the surface crosses.
     private static let edgeTable: [Int] = [
         0x0  ,0x109,0x203,0x30a,0x406,0x50f,0x605,0x70c,0x80c,0x905,0xa0f,0xb06,0xc0a,0xd03,0xe09,0xf00,
         0x190,0x99 ,0x393,0x29a,0x596,0x49f,0x795,0x69c,0x99c,0x895,0xb9f,0xa96,0xd9a,0xc93,0xf99,0xe90,
@@ -269,8 +275,7 @@ final class FoamSurfaceBuilder {
         0xf00,0xe09,0xd03,0xc0a,0xb06,0xa0f,0x905,0x80c,0x70c,0x605,0x50f,0x406,0x30a,0x203,0x109,0x0
     ]
 
-    /// For each combination, up to 5 triangles given as edge-index triples,
-    /// terminated by -1.
+    // For each combination, up to 5 triangles given as edge-index triples, terminated by -1.
     private static let triTable: [[Int]] = [
         [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
         [0,8,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],

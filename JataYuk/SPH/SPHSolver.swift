@@ -7,33 +7,29 @@
 
 import simd
 
-/// Geometry of the reaction vessel, shared by the emitter and the collision
-/// code. Metres, with the floor at y == 0. Defaults match the reaction vessel
-/// built in ARViewCoordinator (body cylinder: radius 0.041, spanning y≈0…0.146).
+// Geometry of the reaction vessel, shared by the emitter and the collision code.
+// Metres, with the floor at y == 0. Defaults match the reaction vessel built in ARViewCoordinator
+// (body cylinder: radius 0.041, spanning y≈0…0.146).
 struct ContainerGeometry {
     var radius: Float = 0.041   // 4.1 cm
     var height: Float = 0.146   // rim height (foam overflows above this)
 
-    /// Interior volume in litres — used to keep FoamModel's container fields
-    /// consistent with the vessel the user actually sees.
+    // Interior volume in litres — used to keep FoamModel's container fields consistent with the vessel the user actually sees.
     var volumeLitres: Double {
         Double(Float.pi * radius * radius * height) * 1000.0
     }
 }
 
-/// Real-time 3D SPH solver (Müller et al. 2003) tuned for thick, oozing foam.
-///
-/// The chemistry model never touches this class — it only *adds* particles with
-/// a chosen initial velocity. Once a particle exists, SPH alone governs it via
-/// pressure, viscosity, cohesion, gravity, and wall/floor collisions.
-///
-/// Units are centimetre-scale (the vessel is a few cm), so the constants below
-/// differ from a "water in a bucket" demo. They are fitted for stability and
-/// look, not measured — retune against real footage.
+// Real-time 3D SPH solver (Müller et al. 2003) tuned for thick, oozing foam.
+//   • The chemistry model never touches this class — it only *adds* particles with a chosen initial velocity.
+//   • Once a particle exists, SPH alone governs it via pressure, viscosity, cohesion, gravity, and wall/floor collisions.
+
+//   • Units are centimetre-scale (the vessel is a few cm), so the constants below differ from a "water in a bucket" demo.
+//   • They are fitted for stability and look, not measured — retune against real footage.
 final class SPHSolver {
 
-    /// FOAM preset: high viscosity + high cohesion + strong damping so the
-    /// material heaps and piles on itself instead of self-levelling like water.
+    // FOAM preset: high viscosity + high cohesion + strong damping
+    //   • So the material heaps and piles on itself instead of self-levelling like water.
     struct Config {
         var smoothingRadius: Float = 0.022
         var particleMass: Float    = 0.0016
@@ -42,13 +38,13 @@ final class SPHSolver {
         var viscosity: Float       = 12    // thick → stacks & oozes, doesn't run like water
         var cohesion: Float        = 6.0   // HIGHER → holds together & stacks vertically (was 4.0)
         var xsph: Float            = 0.3   // XSPH velocity smoothing → laminar, coherent flow (0 = off)
-        var gravity: SIMD3<Float>  = [0, -1.6, 0]  // enough to keep foam settling as a mass (was -0.5 → floated apart)
+        var gravity: SIMD3<Float>  = [0, -1.0, 0]  // 1.0m/s^2
         var linearDamping: Float   = 2.0    // STRONG → stops in place, stacks (was 0.4)
         var restitution: Float     = 0.0    // zero bounce off floor/walls
         var friction: Float        = 0.8    // grippy, doesn't slide apart
         var yieldSpeed: Float      = 0.16   // below this speed the foam "sets" — higher → stacks sooner, holds a pile
         var restFriction: Float    = 0.2    // lateral velocity kept once set (low → locks a heap in place)
-        var stackRadius: Float     = 0.12   // within this radius of the beaker foam sets firmly (stacks tall); beyond it spreads flat
+        var stackRadius: Float     = 0.12   // within this radius of the beaker foam sets firmly (stacks tall)
         var topSpread: Float       = 2.0      // horizontal accel added near the plume's apex → it fans out at the top
         var apexSpeed: Float       = 0.6    // upward-speed window (m/s) that counts as "reaching the top"
         var floorContactBand: Float   = 0.1  // height above the floor where bounce is absorbed
@@ -72,17 +68,21 @@ final class SPHSolver {
     private let viscLapCoeff: Float
 
     var count: Int { particles.count }
-    /// Upward acceleration from gas generation (m/s²), applied only to particles
-    /// still inside the vessel (below the rim). Set each frame by the driver;
-    /// 0 once the reaction stops producing gas. This is the volumetric lift that
-    /// makes the whole column erupt, rather than only the newest particles.
+    
+    // Upward acceleration from gas generation (m/s²), applied only to particles still inside the vessel (below the rim).
+    //   • Set each frame by the driver; 0 once the reaction stops producing gas.
+    //   • This is the volumetric lift that makes the whole column erupt, rather than only the newest particles.
     var gasLift: Float = 0
-    /// Top of the lift column (world y). Particles below this and inside the
-    /// cylinder radius get pushed up; above it, gravity takes over.
+    
+    // Top of the lift column (world y).
+    //   • Particles below this and inside the cylinder radius get pushed up;
+    //   • Above it, gravity takes over.
     var liftCeiling: Float = 0
-    /// Runtime-overridable viscosity & cohesion. The driver keeps these high
-    /// early (foam stacks into a mound) then lowers them over time so the heap
-    /// slowly relaxes and oozes to the sides. Initialised from Config.
+    
+    // Runtime-overridable viscosity & cohesion.
+    //   • The driver keeps these high early (foam stacks into a mound) then lowers them over time
+    //   • So the heap slowly relaxes and oozes to the sides.
+    //   • Initialised from Config.
     var runtimeViscosity: Float = 0
     var runtimeCohesion: Float = 0
 
@@ -101,18 +101,18 @@ final class SPHSolver {
         runtimeCohesion = config.cohesion
     }
 
-    /// Append newly emitted particles, respecting the hard cap.
+    // Append newly emitted particles, respecting the hard cap.
     func add(_ newParticles: [Particle]) {
         let room = config.maxParticles - particles.count
         guard room > 0 else { return }
         particles.append(contentsOf: newParticles.prefix(room))
     }
 
-    /// Remove all particles (Reset).
+    // Remove all particles (Reset).
     func clear() { particles.removeAll(keepingCapacity: true) }
 
-    /// Advance the whole simulation by `dt`, split into substeps for stability.
-    /// `dt` is clamped so a dropped frame can't blow the sim up.
+    // Advance the whole simulation by `dt`, split into substeps for stability.
+    //   • `dt` is clamped so a dropped frame can't blow the sim up.
     func update(dt: Float) {
         guard !particles.isEmpty else { return }
         let clamped = min(dt, 1.0 / 30.0)
@@ -130,10 +130,10 @@ final class SPHSolver {
         integrate(dt)
     }
 
-    /// XSPH velocity smoothing (Monaghan). Blends each particle's velocity a
-    /// little toward the mass-weighted average of its neighbours, so the fluid
-    /// moves in coherent sheets — laminar — instead of each particle jittering
-    /// on its own. It barely changes momentum, so it smooths without freezing.
+    // XSPH velocity smoothing (Monaghan).
+    //   • Blends each particle's velocity a little toward the mass-weighted average of its neighbours.
+    //   • So the fluid moves in coherent sheets — laminar — instead of each particle jittering on its own.
+    //   • It barely changes momentum, so it smooths without freezing.
     private func applyXSPH(_ epsilon: Float) {
         guard epsilon > 0, !particles.isEmpty else { return }
         let m = config.particleMass
@@ -157,9 +157,9 @@ final class SPHSolver {
         for i in particles.indices { particles[i].velocity += deltas[i] }
     }
 
-    /// Poly6 density (includes self-contribution), then pressure from a simple
-    /// equation of state. Negative pressure is clamped to zero so the pressure
-    /// term never glues particles together — cohesion handles clumping.
+    // Poly6 density (includes self-contribution), then pressure from a simple equation of state.
+    //   • Negative pressure is clamped to zero
+    //   • So the pressure term never glues particles together — cohesion handles clumping.
     private func computeDensityAndPressure() {
         let selfDensity = config.particleMass * poly6Coeff * (h2 * h2 * h2) // (h²-0)³
         for i in particles.indices {
@@ -179,8 +179,8 @@ final class SPHSolver {
         }
     }
 
-    /// Pressure (repulsion) + viscosity (velocity smoothing) + cohesion
-    /// (attraction), summed into an acceleration. Gravity is added at integration.
+    // Pressure (repulsion) + viscosity (velocity smoothing) + cohesion (attraction), summed into an acceleration.
+    //   • Gravity is added at integration.
     private func computeForces() {
         let m = config.particleMass
         for i in particles.indices {
@@ -224,8 +224,10 @@ final class SPHSolver {
         }
     }
 
-    /// Semi-implicit (symplectic) Euler: update velocity first, then use the new
-    /// velocity for position. Damping + speed clamp keep the foam calm.
+    // Semi-implicit (symplectic) Euler:
+    //   • Update velocity first,
+    //   • Then use the new velocity for position.
+    //   • Damping + speed clamp keep the foam calm.
     private func integrate(_ dt: Float) {
         let damp = max(0, 1 - config.linearDamping * dt)
         // Foam counts as "resting" when its acceleration is well below free fall
@@ -239,19 +241,19 @@ final class SPHSolver {
             if gasLift != 0,
                p0.y < liftCeiling,
                (p0.x * p0.x + p0.z * p0.z) < geometry.radius * geometry.radius {
-                // Taper the lift from full at the rim to zero at the ceiling, so
-                // particles ease over the top and spill out — instead of piling
-                // against an invisible lid (the "clump in the sky, then explode").
+                // Taper the lift from full at the rim to zero at the ceiling,
+                //   • so particles ease over the top and spill out.
+                //   • instead of piling against an invisible lid (the "clump in the sky, then explode").
                 let span = max(liftCeiling - geometry.height, 1e-4)
                 let frac = min(1, (liftCeiling - p0.y) / span)
                 a.y += gasLift * frac
             }
 
-            // Apex spread: when a particle is above the rim and its UPWARD speed
-            // has nearly run out (it's at the top of its arc), push it sideways —
-            // outward plus a random jitter — so the plume fans/mushrooms at the
-            // crown instead of dribbling straight down. Strongest right at the
-            // apex; fades to zero for particles still moving fast up or down.
+            // Apex spread: when a particle is above the rim and its UPWARD speed has nearly run out
+            //   • (it's at the top of its arc), push it sideways
+            //   • So it goes outward plus a random jitter
+            //   • so the plume fans/mushrooms at the crown instead of dribbling straight down.
+            //   • Strongest right at the apex; fades to zero for particles still moving fast up or down.
             if config.topSpread > 0, p0.y > geometry.height {
                 let vy = particles[i].velocity.y
                 if vy < config.apexSpeed {
@@ -280,16 +282,19 @@ final class SPHSolver {
             let speed = simd_length(v)
             if speed > config.maxSpeed { v *= config.maxSpeed / speed }
 
-            // Yield / static friction: once foam has nearly stopped, freeze its
-            // LATERAL motion so a pile HOLDS its shape and stacks, instead of
-            // slowly creeping flat. Vertical settling is left alone. This is the
-            // yield stress real foam has and a plain SPH fluid lacks.
-            // Full sleep — but ONLY when resting (slow AND forces balanced), so a
-            // stacked pile holds its shape without flattening, while airborne foam
-            // keeps falling and never freezes in mid-air.
-            // Radial stacking bias: foam sets readily NEAR the beaker (so it
-            // stacks tall) and only weakly FAR from it (so it keeps spreading
-            // flat) → a mound that's tallest at the source and tapers outward.
+            // Yield / static friction: once foam has nearly stopped,
+            //   • freeze its LATERAL motion so a pile HOLDS its shape and stacks,
+            //   • instead of slowly creeping flat.
+            //   • Vertical settling is left alone.
+            //   • This is the yield stress real foam has and a plain SPH fluid lacks.
+            
+            //   • Full sleep — but ONLY when resting (slow AND forces balanced),
+            //   • so a stacked pile holds its shape without flattening,
+            //   • while airborne foam keeps falling and never freezes in mid-air.
+            
+            //   • Radial stacking bias: foam sets readily NEAR the beaker (so it stacks tall)
+            //   • and only weakly FAR from it (so it keeps spreading flat)
+            //   • → a mound that's tallest at the source and tapers outward.
             let stackRadial = (p0.x * p0.x + p0.z * p0.z).squareRoot()
             let nearBeaker = max(0, 1 - stackRadial / config.stackRadius)   // 1 near → 0 far
             let yieldHere = config.yieldSpeed * (0.3 + 0.7 * nearBeaker)
@@ -308,10 +313,11 @@ final class SPHSolver {
 
     // MARK: - Boundaries
 
-    /// Floor plane plus a zero-thickness cylinder wall. A particle keeps to
-    /// whichever side of the wall it is currently on: emitted particles stay
-    /// inside until they clear the rim, then fall and pool on the outside — so
-    /// floor accumulation emerges from the physics, not from hand animation.
+    // Floor plane plus a zero-thickness cylinder wall.
+    //   • A particle keeps to whichever side of the wall it is currently on:
+    //   • emitted particles stay inside until they clear the rim,
+    //   • then fall and pool on the outside
+    //   • so floor accumulation emerges from the physics, not from hand animation.
     private func resolveCollisions(position p: inout SIMD3<Float>,
                                    velocity v: inout SIMD3<Float>) {
         let r = config.collisionRadius
@@ -349,7 +355,7 @@ final class SPHSolver {
         }
     }
 
-    /// Reflect the radial velocity off a vertical wall and shed some energy.
+    // Reflect the radial velocity off a vertical wall and shed some energy.
     private func reflectRadial(_ v: inout SIMD3<Float>, dir: SIMD2<Float>) {
         let vr = v.x * dir.x + v.z * dir.y
         v.x -= (1 + config.restitution) * vr * dir.x

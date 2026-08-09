@@ -7,21 +7,20 @@
 
 import simd
 
-/// Explicit integer cell coordinate used as a dictionary key. Using a struct
-/// (rather than folding three ints into one hash) guarantees no key collisions,
-/// so neighbour queries never return particles from an unrelated cell.
+// Explicit integer cell coordinate used as a dictionary key.
+//   • Using a struct (rather than folding three ints into one hash) guarantees no key collisions,
+//   • So neighbour queries never return particles from an unrelated cell.
 private struct CellKey: Hashable {
     let x: Int32
     let y: Int32
     let z: Int32
 }
 
-/// Uniform-grid spatial hash giving O(n) neighbour search instead of O(n²).
-///
-/// Particles are bucketed into cubic cells of side `cellSize`. The SPH kernels
-/// vanish beyond the smoothing radius `h`, so with `cellSize == h` every
-/// possible neighbour lies in the particle's own cell or the 26 cells around
-/// it — 27 cells total.
+// Uniform-grid spatial hash giving O(n) neighbour search instead of O(n²).
+//   • Particles are bucketed into cubic cells of side `cellSize`.
+//   • The SPH kernels vanish beyond the smoothing radius `h`,
+//   • so with `cellSize == h` every possible neighbour lies in the particle's own cell
+//   • or the 26 cells around it — 27 cells total.
 final class SpatialHash {
     private let cellSize: Float
     private var buckets: [CellKey: [Int]] = [:]
@@ -30,8 +29,7 @@ final class SpatialHash {
         self.cellSize = cellSize
     }
 
-    /// Rebuild the grid from scratch — called once per substep because
-    /// positions change every substep.
+    // Rebuild the grid from scratch — called once per substep because positions change every substep.
     func build(_ particles: [Particle]) {
         buckets.removeAll(keepingCapacity: true)
         for i in particles.indices {
@@ -39,8 +37,8 @@ final class SpatialHash {
         }
     }
 
-    /// Invoke `body` for every particle index in the 27-cell neighbourhood
-    /// around `position`. The caller still applies the exact radius test.
+    // Invoke `body` for every particle index in the 27-cell neighbourhood around `position`.
+    //   • The caller still applies the exact radius test.
     @inline(__always)
     func forEachNeighbour(of position: SIMD3<Float>, _ body: (Int) -> Void) {
         let base = cell(for: position)
