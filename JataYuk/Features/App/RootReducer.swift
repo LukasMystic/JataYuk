@@ -99,11 +99,21 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
     case .pourIngredient(let side, let index):
         guard index < state.experiment[side].ingredients.count else { break }
         guard !state.experiment[side].ingredients[index].isDepleted else { break }
-        let type = state.experiment[side].ingredients[index].type
+        let ingredient = state.experiment[side].ingredients[index]
+        let type = ingredient.type
         state.experiment[side].ingredients[index].pourCount += 1
         state.experiment[side].mixingBeaker.contents.append(type)
         if state.experiment[side].ingredients[index].isDepleted {
             state.experiment[side].ingredients[index].grayOutReason = .depleted
+        }
+        if state.experiment[side].mixingBeaker.mixtureState == .idle {
+            state.experiment[side].mixingBeaker.mixtureState = .prepared
+        }
+        switch type {
+        case .h2o2:    state.experiment.foam.volumeL    += ingredient.amountPerPour / 1000
+        case .soap:    state.experiment.foam.soapTbsp   += ingredient.amountPerPour
+        case .yeast:   state.experiment.foam.yeastTbsp  += ingredient.amountPerPour
+        case .water, .foodColoring: break
         }
 
     case .selectH2O2Variant(let variant):
