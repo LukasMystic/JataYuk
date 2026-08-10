@@ -19,7 +19,7 @@ final class FoamSPHSystem {
 
     private let container: Entity
     private let geometry: ContainerGeometry
-    private let solver: SPHSolver
+    private let solver: GPUSPHSolver
     private var emitter: ParticleEmitter?
     private var model: FoamModel?
 
@@ -30,8 +30,14 @@ final class FoamSPHSystem {
     private let surfaceMaterial: RealityKit.Material
     // Rebuild the (costly) surface mesh every N frames;
     //  • positions between rebuilds barely change at 60 fps, so this halves the meshing cost.
-    private let rebuildEvery = 2
+    private let rebuildEvery = 1   // rebuild+upload the mesh every 2nd frame (fewer GPU uploads)
     private var frameCounter = 0
+    // Background meshing: marching cubes runs off the main thread so it never
+    // blocks rendering. Only one build runs at a time (isMeshing), and a
+    // generation token drops stale builds after a reset/restart.
+    private let meshQueue = DispatchQueue(label: "com.jatayuk.foammesh", qos: .userInitiated)
+    private var isMeshing = false
+    private var meshGeneration = 0
 
     private var elapsed: Double = 0
     private var running = false
@@ -45,7 +51,7 @@ final class FoamSPHSystem {
     init(container: Entity, geometry: ContainerGeometry) {
         self.container = container
         self.geometry = geometry
-        self.solver = SPHSolver(config: SPHSolver.Config(), geometry: geometry)
+        self.solver = GPUSPHSolver(config: SPHSolver.Config(), geometry: geometry)
 
         // White, matte foam skin with a faint wet sheen. faceCulling = .none
         //  • so the open underside of the blob (at the floor) never shows holes.
@@ -74,6 +80,7 @@ final class FoamSPHSystem {
         solver.runtimeCohesion = solver.config.cohesion
         surfaceEntity.isEnabled = false
         frameCounter = 0
+        meshGeneration += 1   // invalidate any in-flight background mesh
         elapsed = 0
         stopTime = model.decayTime(to: 0.15) + 6.0   // + settle time
         running = true
@@ -136,6 +143,7 @@ final class FoamSPHSystem {
         emitter = nil
         model = nil
         elapsed = 0
+        meshGeneration += 1   // invalidate any in-flight background mesh
         surfaceEntity.isEnabled = false
     }
 
@@ -144,10 +152,22 @@ final class FoamSPHSystem {
     // Regenerate the single foam mesh from the current particle cloud.
     //  • Marching Cubes turns the overlapping particle "bumps" into one connected surface.
     private func syncSurface() {
-        guard let mesh = surfaceBuilder.buildMesh(from: solver.particles) else {
-            return   // keep the last surface instead of blinking off
+        guard !isMeshing else { return }         // previous build still running — skip this frame
+        let snapshot = solver.particles          // value-type (COW) snapshot, safe for the bg thread
+        guard snapshot.count >= 4 else { return }
+        let gen = meshGeneration
+        isMeshing = true
+        meshQueue.async { [weak self] in
+            guard let self else { return }
+            let mesh = self.surfaceBuilder.buildMesh(from: snapshot)   // heavy work, off main
+            DispatchQueue.main.async {
+                defer { self.isMeshing = false }
+                guard gen == self.meshGeneration else { return }       // stale (reset/restart) — drop it
+                if let mesh {
+                    self.surfaceEntity.model = ModelComponent(mesh: mesh, materials: [self.surfaceMaterial])
+                    self.surfaceEntity.isEnabled = true
+                }
+            }
         }
-        surfaceEntity.model = ModelComponent(mesh: mesh, materials: [surfaceMaterial])
-        surfaceEntity.isEnabled = true
     }
 }

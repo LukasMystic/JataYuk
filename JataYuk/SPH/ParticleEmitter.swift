@@ -63,7 +63,7 @@ final class ParticleEmitter {
         // controls HOW MANY particles are emitted (up to maxParticles), so
         // stronger recipes visibly produce more foam. Mid/strong recipes cap out
         // at maxParticles; weaker recipes come out proportionally smaller.
-        litresPerParticle = 0.01
+        litresPerParticle = 0.005   // 5 mL/particle → ~2× the particle density (more, smaller foam)
         peakHeightCm = model.peakHeightCm
         let peakGas = max(0, model.peakVolumeL - model.liquidL)
         totalParticles = min(maxParticles, Int(peakGas / litresPerParticle))

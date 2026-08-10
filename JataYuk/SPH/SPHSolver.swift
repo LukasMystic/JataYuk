@@ -38,12 +38,12 @@ final class SPHSolver {
         var viscosity: Float       = 12    // thick → stacks & oozes, doesn't run like water
         var cohesion: Float        = 6.0   // HIGHER → holds together & stacks vertically (was 4.0)
         var xsph: Float            = 0.3   // XSPH velocity smoothing → laminar, coherent flow (0 = off)
-        var gravity: SIMD3<Float>  = [0, -1.0, 0]  // 1.0m/s^2
+        var gravity: SIMD3<Float>  = [0, -0.8, 0]  //  in m/s^2
         var linearDamping: Float   = 2.0    // STRONG → stops in place, stacks (was 0.4)
         var restitution: Float     = 0.0    // zero bounce off floor/walls
         var friction: Float        = 0.8    // grippy, doesn't slide apart
         var yieldSpeed: Float      = 0.16   // below this speed the foam "sets" — higher → stacks sooner, holds a pile
-        var restFriction: Float    = 0.2    // lateral velocity kept once set (low → locks a heap in place)
+        var restFriction: Float    = 0.18    // lateral velocity kept once set (low → locks a heap in place)
         var stackRadius: Float     = 0.12   // within this radius of the beaker foam sets firmly (stacks tall)
         var topSpread: Float       = 2.0      // horizontal accel added near the plume's apex → it fans out at the top
         var apexSpeed: Float       = 0.6    // upward-speed window (m/s) that counts as "reaching the top"
@@ -51,8 +51,8 @@ final class SPHSolver {
         var floorContactDamping: Float = 0.35  // vertical velocity kept in that band (low → less bounce)
         var maxSpeed: Float        = 1.6   // calmer → less splashy, more laminar
         var collisionRadius: Float = 0.006
-        var substeps: Int          = 4      // +1 for stability under the stronger forces
-        var maxParticles: Int      = 500
+        var substeps: Int          = 3      // fewer GPU substeps → shorter main-thread wait
+        var maxParticles: Int      = 1000   // GPU handles this fine; CPU mesher is now the limit
     }
 
     private(set) var particles: [Particle] = []

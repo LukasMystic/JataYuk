@@ -31,7 +31,7 @@ final class FoamSurfaceBuilder {
     // How far each particle's "bump" reaches.
     //  • Larger = blobbier / more merged,
     //  • and thin/spread foam still forms a surface instead of vanishing.
-    var influenceRadius: Float = 0.07
+    var influenceRadius: Float = 0.085
     
     // Surface threshold. The mesh is drawn where the summed field crosses this.
     //  • Lower → fatter foam that survives spreading;
@@ -45,7 +45,7 @@ final class FoamSurfaceBuilder {
     // Laplacian smoothing passes over the finished mesh
     //  • relax each vertex toward its neighbours' average to soften the faceted marching-cubes look into a rounder skin.
     //  • Cheaper than a finer grid. 0 = off.
-    var smoothingIterations: Int = 2
+    var smoothingIterations: Int = 4
     
     // How far each vertex moves toward the neighbour average per pass (0…1).
     //  • Higher = smoother but shrinks/rounds the shape more.
