@@ -9,6 +9,7 @@ import Foundation
 import RealityKit
 import ARKit
 import UIKit
+import Combine
 
 @MainActor
 final class ARCoordinator: NSObject {
@@ -24,6 +25,7 @@ final class ARCoordinator: NSObject {
     private var stationBAnchor: AnchorEntity?
 
     private let motionClient = MotionClient()
+    private var cancellables = Set<AnyCancellable>()
 
     init(store: Store<RootState, RootAction>) {
         self.store = store
@@ -32,6 +34,7 @@ final class ARCoordinator: NSObject {
     func stopMotionMonitoring() {
         motionClient.stopTiltMonitoring()
         motionClient.stopShakeMonitoring()
+        cancellables.removeAll()
     }
 
     // MARK: - Tap to Place
@@ -51,6 +54,8 @@ final class ARCoordinator: NSObject {
             hidePlaneVisualizations()
             startTiltMonitoring()
             startShakeMonitoring()
+            spawnInteractiveEntities()
+            subscribeToProximityUpdates()
         }
     }
 
@@ -127,6 +132,130 @@ final class ARCoordinator: NSObject {
             }
         }
         return nil
+    }
+
+    // MARK: - Entity Spawning
+
+    private func spawnInteractiveEntities() {
+        if let anchorA = stationAAnchor {
+            spawnIngredients(store.state.experiment.stationA.ingredients, on: anchorA, side: .sideA)
+            spawnMixingBeaker(on: anchorA, side: .sideA)
+        }
+        if let anchorB = stationBAnchor {
+            spawnIngredients(store.state.experiment.stationB.ingredients, on: anchorB, side: .sideB)
+            spawnMixingBeaker(on: anchorB, side: .sideB)
+        }
+    }
+
+    private func spawnIngredients(_ ingredients: [Ingredient], on anchor: AnchorEntity, side: StationSide) {
+        let spacing: Float = 0.065
+        let startX = -Float(ingredients.count - 1) * spacing / 2
+        for (i, ingredient) in ingredients.enumerated() {
+            let entity = ModelEntity(
+                mesh: .generateSphere(radius: 0.027),
+                materials: [SimpleMaterial(color: ingredientColor(ingredient.type), isMetallic: false)]
+            )
+            entity.position = SIMD3(startX + Float(i) * spacing, 0.06, 0)
+            entity.components.set(IngredientComponent(side: side, ingredientIndex: i))
+            anchor.addChild(entity)
+        }
+    }
+
+    private func spawnMixingBeaker(on anchor: AnchorEntity, side: StationSide) {
+        let entity = ModelEntity(
+            mesh: .generateCylinder(height: 0.07, radius: 0.032),
+            materials: [SimpleMaterial(color: .white.withAlphaComponent(0.75), isMetallic: false)]
+        )
+        entity.position = SIMD3(0, 0.07, -0.07)
+        entity.components.set(MixingBeakerComponent(side: side))
+        anchor.addChild(entity)
+    }
+
+    private func ingredientColor(_ type: BeakerType) -> UIColor {
+        switch type {
+        case .h2o2:         return .systemBlue
+        case .soap:         return .systemYellow
+        case .foodColoring: return .systemRed
+        case .water:        return .systemCyan
+        case .yeast:        return .brown
+        }
+    }
+
+    // MARK: - Proximity Detection
+
+    // Camera must be within these distances (meters) for state transitions.
+    private static let inHandDistanceM: Float      = 0.15
+    private static let highlightedDistanceM: Float = 0.35
+
+    private func subscribeToProximityUpdates() {
+        guard let arView else { return }
+        // frameCount lives on the RealityKit update thread — safely captured by the closure.
+        var frameCount = 0
+        arView.scene.subscribe(to: SceneEvents.Update.self) { [weak self] _ in
+            frameCount += 1
+            guard frameCount % 10 == 0 else { return }  // ~6 Hz, avoids flooding MainActor
+            Task { @MainActor [weak self] in self?.updateProximity() }
+        }
+        .store(in: &cancellables)
+    }
+
+    private func updateProximity() {
+        guard let arView else { return }
+        let cameraPos = arView.cameraTransform.translation
+
+        for anchor in [stationAAnchor, stationBAnchor].compactMap({ $0 }) {
+            for child in anchor.children {
+                if let comp = child.components[IngredientComponent.self] {
+                    updateIngredientProximity(entity: child, comp: comp, cameraPos: cameraPos)
+                } else if let comp = child.components[MixingBeakerComponent.self] {
+                    updateBeakerProximity(entity: child, comp: comp, cameraPos: cameraPos)
+                }
+            }
+        }
+    }
+
+    private func updateIngredientProximity(entity: Entity, comp: IngredientComponent, cameraPos: SIMD3<Float>) {
+        let ingredient = store.state.experiment[comp.side].ingredients[comp.ingredientIndex]
+        guard ingredient.isInteractive else { return }
+
+        let distance = simd_distance(cameraPos, entity.position(relativeTo: nil))
+        let newState = proximityState(for: distance)
+        let current = ingredient.proximityState
+        guard newState != current else { return }
+
+        switch (current, newState) {
+        case (_, .inHand) where !anythingInHand():
+            store.send(.ar(.pickupIngredient(comp.side, comp.ingredientIndex)))
+        case (.inHand, _):
+            store.send(.ar(.releaseIngredient(comp.side, comp.ingredientIndex)))
+        default:
+            store.send(.ar(.ingredientProximityChanged(comp.side, comp.ingredientIndex, newState)))
+        }
+    }
+
+    private func updateBeakerProximity(entity: Entity, comp: MixingBeakerComponent, cameraPos: SIMD3<Float>) {
+        let distance = simd_distance(cameraPos, entity.position(relativeTo: nil))
+        let newState = proximityState(for: distance)
+        let current = store.state.experiment[comp.side].mixingBeaker.proximityState
+        guard newState != current else { return }
+
+        if newState == .inHand, anythingInHand() { return }
+        store.send(.ar(.mixingBeakerProximityChanged(comp.side, newState)))
+    }
+
+    private func proximityState(for distance: Float) -> ARProximityState {
+        if distance < Self.inHandDistanceM      { return .inHand }
+        if distance < Self.highlightedDistanceM { return .highlighted }
+        return .far
+    }
+
+    // Returns true when any ingredient or beaker is already held, preventing simultaneous holds.
+    private func anythingInHand() -> Bool {
+        for side in [StationSide.sideA, StationSide.sideB] {
+            if store.state.experiment[side].ingredients.contains(where: { $0.proximityState == .inHand }) { return true }
+            if store.state.experiment[side].mixingBeaker.proximityState == .inHand { return true }
+        }
+        return false
     }
 
     // MARK: - Plane Visualizations
