@@ -14,6 +14,7 @@ struct ARExperimentView: View {
 
     #if DEBUG
     @StateObject private var motionObserver = MotionDebugObserver()
+    @State private var isDebugExpanded = false
     #endif
 
     var body: some View {
@@ -88,8 +89,19 @@ struct ARExperimentView: View {
             let holdingAnyBeaker = holdingBeakerA || holdingBeakerB
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("DEBUG — Motion Test")
-                    .font(.caption.bold())
+                // Header row with collapse toggle
+                HStack {
+                    Text("DEBUG — Motion Test")
+                        .font(.caption.bold())
+                    Spacer()
+                    Button(isDebugExpanded ? "Hide ▲" : "Show ▼") {
+                        isDebugExpanded.toggle()
+                    }
+                    .font(.caption2.bold())
+                    .foregroundColor(.white.opacity(0.7))
+                }
+
+                if isDebugExpanded {
 
                 Divider().overlay(.white.opacity(0.4))
 
@@ -151,6 +163,32 @@ struct ARExperimentView: View {
                     .buttonStyle(.bordered).tint(.orange)
                     .disabled(!holdingAnyBeaker)
                 }
+
+                Divider().overlay(.white.opacity(0.4))
+
+                // ── Proximity (live from ProximitySystem) ──
+                Text("PROXIMITY (live)")
+                    .font(.caption2.bold()).foregroundColor(.white.opacity(0.6))
+                ForEach(Array(store.state.experiment.stationA.ingredients.enumerated()), id: \.offset) { i, ing in
+                    let typeStr  = String(describing: ing.type)
+                    let stateStr = String(describing: ing.proximityState)
+                    Text("A[\(i)] \(typeStr): \(stateStr)")
+                        .font(.system(size: 9, design: .monospaced))
+                        .foregroundColor(ing.proximityState == .inHand ? .green : ing.proximityState == .highlighted ? .yellow : .white)
+                }
+                ForEach(Array(store.state.experiment.stationB.ingredients.enumerated()), id: \.offset) { i, ing in
+                    let typeStr  = String(describing: ing.type)
+                    let stateStr = String(describing: ing.proximityState)
+                    Text("B[\(i)] \(typeStr): \(stateStr)")
+                        .font(.system(size: 9, design: .monospaced))
+                        .foregroundColor(ing.proximityState == .inHand ? .green : ing.proximityState == .highlighted ? .yellow : .white)
+                }
+                let beakerAState = String(describing: beakerA.proximityState)
+                let beakerBState = String(describing: beakerB.proximityState)
+                Text("Beaker A: \(beakerAState)  |  Beaker B: \(beakerBState)")
+                    .font(.system(size: 9, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.8))
+                } // end if isDebugExpanded
             }
             .foregroundColor(.white)
             .padding(10)
