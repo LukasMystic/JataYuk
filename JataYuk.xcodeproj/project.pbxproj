@@ -6,7 +6,18 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		80BF9D983029D3AA0082868D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D1F5EBD43019F4100093CA76 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D1F5EBDB3019F4100093CA76;
+			remoteInfo = JataYuk;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		80BF9D943029D3AA0082868D /* JataYukTest.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JataYukTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1F5EBDC3019F4100093CA76 /* JataYuk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JataYuk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -21,6 +32,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		80BF9D953029D3AA0082868D /* JataYukTest */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = JataYukTest;
+			sourceTree = "<group>";
+		};
 		D1F5EBDE3019F4100093CA76 /* JataYuk */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -32,6 +48,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		80BF9D913029D3AA0082868D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D1F5EBD93019F4100093CA76 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -46,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				D1F5EBDE3019F4100093CA76 /* JataYuk */,
+				80BF9D953029D3AA0082868D /* JataYukTest */,
 				D1F5EBDD3019F4100093CA76 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				D1F5EBDC3019F4100093CA76 /* JataYuk.app */,
+				80BF9D943029D3AA0082868D /* JataYukTest.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,6 +86,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		80BF9D933029D3AA0082868D /* JataYukTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 80BF9D9C3029D3AA0082868D /* Build configuration list for PBXNativeTarget "JataYukTest" */;
+			buildPhases = (
+				80BF9D903029D3AA0082868D /* Sources */,
+				80BF9D913029D3AA0082868D /* Frameworks */,
+				80BF9D923029D3AA0082868D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				80BF9D993029D3AA0082868D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				80BF9D953029D3AA0082868D /* JataYukTest */,
+			);
+			name = JataYukTest;
+			packageProductDependencies = (
+			);
+			productName = JataYukTest;
+			productReference = 80BF9D943029D3AA0082868D /* JataYukTest.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		D1F5EBDB3019F4100093CA76 /* JataYuk */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D1F5EBE93019F4110093CA76 /* Build configuration list for PBXNativeTarget "JataYuk" */;
@@ -90,9 +138,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2660;
+				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
+					80BF9D933029D3AA0082868D = {
+						CreatedOnToolsVersion = 26.4.1;
+						TestTargetID = D1F5EBDB3019F4100093CA76;
+					};
 					D1F5EBDB3019F4100093CA76 = {
 						CreatedOnToolsVersion = 26.6;
 					};
@@ -113,11 +165,19 @@
 			projectRoot = "";
 			targets = (
 				D1F5EBDB3019F4100093CA76 /* JataYuk */,
+				80BF9D933029D3AA0082868D /* JataYukTest */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		80BF9D923029D3AA0082868D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D1F5EBDA3019F4100093CA76 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +188,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		80BF9D903029D3AA0082868D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D1F5EBD83019F4100093CA76 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +204,59 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		80BF9D993029D3AA0082868D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D1F5EBDB3019F4100093CA76 /* JataYuk */;
+			targetProxy = 80BF9D983029D3AA0082868D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		80BF9D9A3029D3AA0082868D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3ZX29GXNUH;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = harley.JataYukTest;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JataYuk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/JataYuk";
+			};
+			name = Debug;
+		};
+		80BF9D9B3029D3AA0082868D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3ZX29GXNUH;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = harley.JataYukTest;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JataYuk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/JataYuk";
+			};
+			name = Release;
+		};
 		D1F5EBEA3019F4110093CA76 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -156,6 +275,7 @@
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -191,6 +311,7 @@
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -332,6 +453,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		80BF9D9C3029D3AA0082868D /* Build configuration list for PBXNativeTarget "JataYukTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				80BF9D9A3029D3AA0082868D /* Debug */,
+				80BF9D9B3029D3AA0082868D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D1F5EBD73019F4100093CA76 /* Build configuration list for PBXProject "JataYuk" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
