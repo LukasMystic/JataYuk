@@ -2,6 +2,8 @@
 //  ARCoordinator+Motion.swift
 //  JataYuk
 //
+//  Created by Stanley Pratama Teguh on 10/08/26.
+//
 
 import RealityKit
 

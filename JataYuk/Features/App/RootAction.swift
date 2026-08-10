@@ -38,4 +38,5 @@ enum ARAction {
     case shakeMixingBeaker(StationSide)
     case interactWithVolcano
     case reactionTick(Double)
+    case resetSession
 }

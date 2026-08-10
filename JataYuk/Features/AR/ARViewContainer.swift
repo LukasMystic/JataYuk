@@ -31,10 +31,16 @@ struct ARViewContainer: UIViewRepresentable {
         arView.addGestureRecognizer(tap)
 
         context.coordinator.arView = arView
+        context.coordinator.setupCameraAnchor()
         return arView
     }
 
-    func updateUIView(_ uiView: ARView, context: Context) {}
+    func updateUIView(_ uiView: ARView, context: Context) {
+        let token = store.state.ar.sessionResetToken
+        if token != context.coordinator.lastSeenResetToken {
+            context.coordinator.resetSession()
+        }
+    }
 
     static func dismantleUIView(_ uiView: ARView, coordinator: ARCoordinator) {
         Task { @MainActor in coordinator.stopMotionMonitoring() }

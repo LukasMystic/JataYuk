@@ -45,6 +45,7 @@ enum GrayOutReason: Equatable {
     case anotherInHand
     case depleted
     case stationLocked
+    case otherSideMixing   // cleared when the other side's beaker reaches .mixed
 }
 
 // MARK: - AR State
@@ -53,4 +54,5 @@ struct ARState: Equatable {
     var availability: ARAvailability = .available
     var placement: ARStationPlacement = .placingVolcano
     var activeStation: StationSide? = nil
+    var sessionResetToken: Int = 0
 }
