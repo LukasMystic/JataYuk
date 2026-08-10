@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXContainerItemProxy section */
-		80BF9D983029D3AA0082868D /* PBXContainerItemProxy */ = {
+		D1B69DEE3028DA40007DF578 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D1F5EBD43019F4100093CA76 /* Project object */;
 			proxyType = 1;
@@ -17,7 +17,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		80BF9D943029D3AA0082868D /* JataYukTest.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JataYukTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D1B69DEA3028DA40007DF578 /* JataYukTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JataYukTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1F5EBDC3019F4100093CA76 /* JataYuk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JataYuk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -32,9 +32,9 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		80BF9D953029D3AA0082868D /* JataYukTest */ = {
+		D1B69DEB3028DA40007DF578 /* JataYukTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = JataYukTest;
+			path = JataYukTests;
 			sourceTree = "<group>";
 		};
 		D1F5EBDE3019F4100093CA76 /* JataYuk */ = {
@@ -48,7 +48,7 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		80BF9D913029D3AA0082868D /* Frameworks */ = {
+		D1B69DE73028DA40007DF578 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -69,7 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				D1F5EBDE3019F4100093CA76 /* JataYuk */,
-				80BF9D953029D3AA0082868D /* JataYukTest */,
+				D1B69DEB3028DA40007DF578 /* JataYukTests */,
 				D1F5EBDD3019F4100093CA76 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -78,7 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				D1F5EBDC3019F4100093CA76 /* JataYuk.app */,
-				80BF9D943029D3AA0082868D /* JataYukTest.xctest */,
+				D1B69DEA3028DA40007DF578 /* JataYukTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -86,27 +86,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		80BF9D933029D3AA0082868D /* JataYukTest */ = {
+		D1B69DE93028DA40007DF578 /* JataYukTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 80BF9D9C3029D3AA0082868D /* Build configuration list for PBXNativeTarget "JataYukTest" */;
+			buildConfigurationList = D1B69DF03028DA40007DF578 /* Build configuration list for PBXNativeTarget "JataYukTests" */;
 			buildPhases = (
-				80BF9D903029D3AA0082868D /* Sources */,
-				80BF9D913029D3AA0082868D /* Frameworks */,
-				80BF9D923029D3AA0082868D /* Resources */,
+				D1B69DE63028DA40007DF578 /* Sources */,
+				D1B69DE73028DA40007DF578 /* Frameworks */,
+				D1B69DE83028DA40007DF578 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				80BF9D993029D3AA0082868D /* PBXTargetDependency */,
+				D1B69DEF3028DA40007DF578 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				80BF9D953029D3AA0082868D /* JataYukTest */,
+				D1B69DEB3028DA40007DF578 /* JataYukTests */,
 			);
-			name = JataYukTest;
+			name = JataYukTests;
 			packageProductDependencies = (
 			);
-			productName = JataYukTest;
-			productReference = 80BF9D943029D3AA0082868D /* JataYukTest.xctest */;
+			productName = JataYukTests;
+			productReference = D1B69DEA3028DA40007DF578 /* JataYukTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		D1F5EBDB3019F4100093CA76 /* JataYuk */ = {
@@ -141,8 +141,8 @@
 				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
-					80BF9D933029D3AA0082868D = {
-						CreatedOnToolsVersion = 26.4.1;
+					D1B69DE93028DA40007DF578 = {
+						CreatedOnToolsVersion = 26.6;
 						TestTargetID = D1F5EBDB3019F4100093CA76;
 					};
 					D1F5EBDB3019F4100093CA76 = {
@@ -165,13 +165,13 @@
 			projectRoot = "";
 			targets = (
 				D1F5EBDB3019F4100093CA76 /* JataYuk */,
-				80BF9D933029D3AA0082868D /* JataYukTest */,
+				D1B69DE93028DA40007DF578 /* JataYukTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		80BF9D923029D3AA0082868D /* Resources */ = {
+		D1B69DE83028DA40007DF578 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -188,7 +188,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		80BF9D903029D3AA0082868D /* Sources */ = {
+		D1B69DE63028DA40007DF578 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -205,25 +205,23 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		80BF9D993029D3AA0082868D /* PBXTargetDependency */ = {
+		D1B69DEF3028DA40007DF578 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D1F5EBDB3019F4100093CA76 /* JataYuk */;
-			targetProxy = 80BF9D983029D3AA0082868D /* PBXContainerItemProxy */;
+			targetProxy = D1B69DEE3028DA40007DF578 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		80BF9D9A3029D3AA0082868D /* Debug */ = {
+		D1B69DF13028DA40007DF578 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3ZX29GXNUH;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = harley.JataYukTest;
+				PRODUCT_BUNDLE_IDENTIFIER = Stanley.JataYukTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -235,17 +233,15 @@
 			};
 			name = Debug;
 		};
-		80BF9D9B3029D3AA0082868D /* Release */ = {
+		D1B69DF23028DA40007DF578 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3ZX29GXNUH;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = harley.JataYukTest;
+				PRODUCT_BUNDLE_IDENTIFIER = Stanley.JataYukTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -453,11 +449,11 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		80BF9D9C3029D3AA0082868D /* Build configuration list for PBXNativeTarget "JataYukTest" */ = {
+		D1B69DF03028DA40007DF578 /* Build configuration list for PBXNativeTarget "JataYukTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				80BF9D9A3029D3AA0082868D /* Debug */,
-				80BF9D9B3029D3AA0082868D /* Release */,
+				D1B69DF13028DA40007DF578 /* Debug */,
+				D1B69DF23028DA40007DF578 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

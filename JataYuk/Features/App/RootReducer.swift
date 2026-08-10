@@ -108,9 +108,30 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
         }
         if state.experiment[side].mixingBeaker.mixtureState == .idle {
             state.experiment[side].mixingBeaker.mixtureState = .prepared
+            // Lock opposite side while this side is mixing; cleared when shake completes.
+            // Override transient locks (.stationLocked) but never .depleted — if the
+            // opposite side's beaker is already mixed its ingredients are permanently
+            // depleted and must not be unlocked later when this shake clears .otherSideMixing.
+            let opp = opposite(side)
+            for i in state.experiment[opp].ingredients.indices
+            where state.experiment[opp].ingredients[i].grayOutReason != .depleted {
+                state.experiment[opp].ingredients[i].grayOutReason = .otherSideMixing
+            }
         }
         switch type {
-        case .h2o2:    state.experiment.foam.volumeL    += ingredient.amountPerPour / 1000
+        case .h2o2:
+            state.experiment.foam.volumeL += ingredient.amountPerPour / 1000
+            if let variant = ingredient.h2o2Variant {
+                state.experiment.foam.concentration = variant.concentration
+            }
+            // Deplete sibling h2o2 variants. Override .anotherInHand if needed —
+            // at pour time the ingredient being poured is in-hand, making siblings .anotherInHand.
+            for i in state.experiment[side].ingredients.indices {
+                let ing = state.experiment[side].ingredients[i]
+                if ing.type == .h2o2, i != index, ing.grayOutReason != .depleted {
+                    state.experiment[side].ingredients[i].grayOutReason = .depleted
+                }
+            }
         case .soap:    state.experiment.foam.soapTbsp   += ingredient.amountPerPour
         case .yeast:   state.experiment.foam.yeastTbsp  += ingredient.amountPerPour
         case .water, .foodColoring: break
@@ -133,7 +154,18 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
         }
 
     case .shakeMixingBeaker(let side):
+        guard state.experiment[side].mixingBeaker.mixtureState == .prepared else { break }
         state.experiment[side].mixingBeaker.mixtureState = .mixed
+        // Lock this side's ingredients permanently — beaker is done.
+        for i in state.experiment[side].ingredients.indices {
+            state.experiment[side].ingredients[i].grayOutReason = .depleted
+        }
+        // Unlock the opposite side so it can start mixing next.
+        let opp = opposite(side)
+        for i in state.experiment[opp].ingredients.indices
+        where state.experiment[opp].ingredients[i].grayOutReason == .otherSideMixing {
+            state.experiment[opp].ingredients[i].grayOutReason = nil
+        }
         if state.experiment.stationA.mixingBeaker.mixtureState == .mixed &&
            state.experiment.stationB.mixingBeaker.mixtureState == .mixed {
             state.experiment.volcanoState = .highlighted
@@ -151,6 +183,12 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
             state.experiment.volcanoState = .done
             state.experiment.reactionState = .done
         }
+
+    case .resetSession:
+        state.ar.placement = .placingVolcano
+        state.ar.activeStation = nil
+        state.ar.sessionResetToken += 1
+        state.experiment = .initial()
     }
     return []
 }
