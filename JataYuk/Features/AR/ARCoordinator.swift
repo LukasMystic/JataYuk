@@ -42,6 +42,10 @@ final class ARCoordinator: NSObject {
     var carriedEntityOriginalParent: Entity?
     var carriedEntityOriginalLocalPos: SIMD3<Float> = .zero
 
+    // Foam SPH simulation (live after allPlaced, nil otherwise)
+    var foamSPHSystem: FoamSPHSystem?
+    var lastSeenVolcanoState: VolcanoState = .locked
+
     // Tracks last reset token and pause state so updateUIView can detect changes.
     var lastSeenResetToken: Int = 0
     var lastSeenIsPaused: Bool = false
@@ -69,6 +73,7 @@ final class ARCoordinator: NSObject {
             print("[Reset] aborting — arView is nil")
             return
         }
+        tearDownExplosionSystem()
         detachCarriedEntity()
         stopMotionMonitoring()
 
@@ -86,7 +91,8 @@ final class ARCoordinator: NSObject {
         planeEntities.removeAll()
 
         lastSeenResetToken = store.state.ar.sessionResetToken
-        lastSeenIsPaused = false   // prevent stale pause state from triggering resumeARSession()
+        lastSeenIsPaused = false       // prevent stale pause state from triggering resumeARSession()
+        lastSeenVolcanoState = .locked // prevent stale volcano state from re-triggering explosion
 
         let config = ARWorldTrackingConfiguration()
         config.planeDetection = [.horizontal]
