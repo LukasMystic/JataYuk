@@ -18,16 +18,32 @@ extension ARCoordinator {
     func subscribeToProximityUpdates() {
         guard let arView else { return }
         var frameCount = 0
-        arView.scene.subscribe(to: SceneEvents.Update.self) { [weak self] _ in
+        arView.scene.subscribe(to: SceneEvents.Update.self) { [weak self] event in
             frameCount += 1
-            guard frameCount % 10 == 0 else { return }  // ~6 Hz
-            Task { @MainActor [weak self] in self?.updateProximity() }
+            let dt = Float(event.deltaTime)
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                // Drive the foam SPH simulation every frame.
+                foamSPHSystem?.update(dt: dt)
+                // Proximity checks run at ~6 Hz to avoid per-frame store churn.
+                guard frameCount % 10 == 0 else { return }
+                updateProximity()
+            }
         }
         .store(in: &cancellables)
     }
 
     func updateProximity() {
         guard let arView else { return }
+
+        // Detect when the volcano starts reacting and kick off the foam simulation.
+        let volcanoState = store.state.experiment.volcanoState
+        if volcanoState != lastSeenVolcanoState {
+            if volcanoState == .reacting {
+                foamSPHSystem?.start(model: store.state.experiment.foam)
+            }
+            lastSeenVolcanoState = volcanoState
+        }
 
         syncVolcanoVisual()
 

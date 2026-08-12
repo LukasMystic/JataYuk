@@ -162,6 +162,15 @@ struct ARExperimentView: View {
                 .tint(.cyan)
                 .transition(.scale.combined(with: .opacity))
 
+            } else if store.state.experiment.volcanoState == .highlighted {
+                // Both beakers mixed — prompt player to interact with the volcano.
+                Button("Interact") {
+                    store.send(.ar(.interactWithVolcano))
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.orange)
+                .transition(.scale.combined(with: .opacity))
+
             } else {
                 // Default — always show Hold, disabled (grey) when nothing is highlighted.
                 let highlighted = highlightedIngredient

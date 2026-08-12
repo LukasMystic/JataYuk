@@ -36,6 +36,7 @@ extension ARCoordinator {
             startTiltMonitoring()
             startShakeMonitoring()
             spawnInteractiveEntities()
+            setupExplosionSystem()
             subscribeToProximityUpdates()
         }
     }
