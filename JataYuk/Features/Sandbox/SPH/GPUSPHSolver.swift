@@ -2,10 +2,10 @@
 //  GPUSPHSolver.swift
 //  JataYuk
 //
-//  GPU-accelerated SPH solver. Drop-in replacement for SPHSolver: same public
-//  API (config, particles, count, gasLift, liftCeiling, runtimeViscosity/Cohesion,
-//  add/clear/update). The physics runs in Metal compute shaders (SPHCompute.metal);
-//  positions are read back each frame so the CPU marching-cubes mesher still works.
+//  GPU-accelerated SPH solver used by SPHSystem.
+//  Public API: config, particles, count, gasLift, liftCeiling, runtimeViscosity/Cohesion,
+//  add/clear/update. Physics runs in Metal (SPHCompute.metal); positions are read back
+//  each frame for CPU marching-cubes meshing.
 //
 //  Uses unified (shared) memory buffers, so on iOS/Apple Silicon there's no copy —
 //  the CPU writes emitted particles straight into the buffers and reads results back.
@@ -16,13 +16,13 @@ import simd
 
 final class GPUSPHSolver {
 
-    let config: SPHSolver.Config
+    let config: SPHConfig
     private let geometry: ContainerGeometry
 
     private(set) var particles: [Particle] = []
     var count: Int { particles.count }
 
-    // Per-frame drivers, set by FoamSPHSystem (same names as the CPU solver).
+    // Per-frame drivers, set by SPHSystem (same names as the CPU solver).
     var gasLift: Float = 0
     var liftCeiling: Float = 0
     var runtimeViscosity: Float = 0
@@ -81,7 +81,7 @@ final class GPUSPHSolver {
         var seed: UInt32 = 0
     }
 
-    init(config: SPHSolver.Config, geometry: ContainerGeometry) {
+    init(config: SPHConfig, geometry: ContainerGeometry) {
         self.config = config
         self.geometry = geometry
         runtimeViscosity = config.viscosity

@@ -23,8 +23,8 @@ extension ARCoordinator {
             let dt = Float(event.deltaTime)
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                // Drive the foam SPH simulation every frame.
-                foamSPHSystem?.update(dt: dt)
+                // Drive the ECS/TCA foam pipeline every frame.
+                explosionStore?.tick(deltaTime: dt)
                 // Proximity checks run at ~6 Hz to avoid per-frame store churn.
                 guard frameCount % 10 == 0 else { return }
                 updateProximity()
@@ -36,11 +36,13 @@ extension ARCoordinator {
     func updateProximity() {
         guard let arView else { return }
 
-        // Detect when the volcano starts reacting and kick off the foam simulation.
+        // Detect volcano state changes and start / sync the explosion store.
         let volcanoState = store.state.experiment.volcanoState
         if volcanoState != lastSeenVolcanoState {
             if volcanoState == .reacting {
-                foamSPHSystem?.start(model: store.state.experiment.foam)
+                startExplosionPipeline()
+            } else {
+                syncExplosionVolcanoState(volcanoState)
             }
             lastSeenVolcanoState = volcanoState
         }
