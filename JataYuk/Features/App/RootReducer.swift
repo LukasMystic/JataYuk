@@ -184,9 +184,16 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
             state.experiment.reactionState = .done
         }
 
+    case .pauseSession:
+        state.ar.isPaused = true
+
+    case .resumeSession:
+        state.ar.isPaused = false
+
     case .resetSession:
         state.ar.placement = .placingVolcano
         state.ar.activeStation = nil
+        state.ar.isPaused = false
         state.ar.sessionResetToken += 1
         state.experiment = .initial()
     }

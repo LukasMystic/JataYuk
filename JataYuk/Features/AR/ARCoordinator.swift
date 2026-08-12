@@ -42,8 +42,9 @@ final class ARCoordinator: NSObject {
     var carriedEntityOriginalParent: Entity?
     var carriedEntityOriginalLocalPos: SIMD3<Float> = .zero
 
-    // Tracks last reset token so updateUIView can detect changes.
+    // Tracks last reset token and pause state so updateUIView can detect changes.
     var lastSeenResetToken: Int = 0
+    var lastSeenIsPaused: Bool = false
 
     init(store: Store<RootState, RootAction>) {
         self.store = store
@@ -63,20 +64,29 @@ final class ARCoordinator: NSObject {
     }
 
     func resetSession() {
-        guard let arView else { return }
+        print("[Reset] resetSession called — arView:\(arView != nil)")
+        guard let arView else {
+            print("[Reset] aborting — arView is nil")
+            return
+        }
         detachCarriedEntity()
         stopMotionMonitoring()
 
-        [volcanoAnchor, stationAAnchor, stationBAnchor].compactMap { $0 }.forEach {
-            arView.scene.removeAnchor($0)
+        // Snapshot anchors first — removing while iterating live collection skips entries.
+        let anchorsToRemove = Array(arView.scene.anchors).filter { $0 !== cameraAnchor }
+        print("[Reset] anchors before removal: \(arView.scene.anchors.count), removing \(anchorsToRemove.count)")
+        for a in anchorsToRemove {
+            print("[Reset]  → \(type(of: a)) id:\(a.id) name:'\(a.name)'")
         }
+        anchorsToRemove.forEach { arView.scene.removeAnchor($0) }
+        print("[Reset] anchors after removal: \(arView.scene.anchors.count)")
         volcanoAnchor = nil; stationAAnchor = nil; stationBAnchor = nil
         volcanoPosition = nil; stationAPosition = nil; stationBPosition = nil
         volcanoEntity = nil; beakerEntities.removeAll()
-        planeEntities.values.forEach { arView.scene.removeAnchor($0) }
         planeEntities.removeAll()
 
         lastSeenResetToken = store.state.ar.sessionResetToken
+        lastSeenIsPaused = false   // prevent stale pause state from triggering resumeARSession()
 
         let config = ARWorldTrackingConfiguration()
         config.planeDetection = [.horizontal]

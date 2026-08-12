@@ -29,6 +29,10 @@ extension ARCoordinator {
 
         if store.state.ar.placement == .allPlaced {
             hidePlaneVisualizations()
+            // Stop plane detection — world tracking continues so placed entities stay put.
+            let frozenConfig = ARWorldTrackingConfiguration()
+            frozenConfig.planeDetection = []
+            arView.session.run(frozenConfig)
             startTiltMonitoring()
             startShakeMonitoring()
             spawnInteractiveEntities()

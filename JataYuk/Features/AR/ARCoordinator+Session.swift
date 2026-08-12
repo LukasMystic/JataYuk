@@ -42,6 +42,24 @@ extension ARCoordinator: ARSessionDelegate {
         }
     }
 
+    // MARK: - Pause / Resume
+
+    func pauseARSession() {
+        arView?.session.pause()
+        stopMotionMonitoring()          // stops tilt + shake CoreMotion loops
+        cancellables.removeAll()        // stops proximity SceneEvents.Update subscription
+    }
+
+    func resumeARSession() {
+        guard let arView else { return }
+        let config = ARWorldTrackingConfiguration()
+        config.planeDetection = []      // already placed — no plane detection needed
+        arView.session.run(config)      // no reset options — preserves world map and anchor positions
+        startTiltMonitoring()
+        startShakeMonitoring()
+        subscribeToProximityUpdates()
+    }
+
     // MARK: - Plane helpers
 
     private func addPlanes(_ planes: [ARPlaneAnchor]) {
@@ -55,6 +73,7 @@ extension ARCoordinator: ARSessionDelegate {
     }
 
     private func updatePlanes(_ planes: [ARPlaneAnchor]) {
+        guard store.state.ar.placement != .allPlaced else { return }
         for plane in planes {
             guard let anchor = planeEntities[plane.identifier],
                   let entity = anchor.children.first as? ModelEntity else { continue }
@@ -63,7 +82,7 @@ extension ARCoordinator: ARSessionDelegate {
     }
 
     private func removePlanes(_ planes: [ARPlaneAnchor]) {
-        guard let arView else { return }
+        guard let arView, store.state.ar.placement != .allPlaced else { return }
         for plane in planes {
             if let anchor = planeEntities.removeValue(forKey: plane.identifier) {
                 arView.scene.removeAnchor(anchor)

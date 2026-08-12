@@ -55,4 +55,5 @@ struct ARState: Equatable {
     var placement: ARStationPlacement = .placingVolcano
     var activeStation: StationSide? = nil
     var sessionResetToken: Int = 0
+    var isPaused: Bool = false
 }
