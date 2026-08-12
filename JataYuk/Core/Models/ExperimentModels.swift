@@ -110,19 +110,17 @@ struct FoamModel: Equatable {
     var volumeL: Double = 0
     var soapTbsp: Double = 0
     var yeastTbsp: Double = 0
-    var tempC: Double = 25
+    var tempC: Double = 30
     var containerRadiusCm: Double = 5
     var containerVolumeL: Double = 1
+}
 
-    func volume(at t: Double) -> Double {
-        // TODO: plug in real foam growth curve
-        0
-    }
-
-    func height(at t: Double) -> Double {
-        // TODO: derive from volume and container radius
-        0
-    }
+struct FoamResult: Equatable {
+    var peakVolumeL: Double = 0
+    var peakHeightCm: Double = 0
+    var oxygenL: Double = 0
+    var reactionDuration: Double = 0
+    var totalParticles: Double = 0
 }
 
 // MARK: - Experiment State
