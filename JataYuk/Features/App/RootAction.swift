@@ -11,6 +11,7 @@ enum RootAction {
     case navigate(to: AppRoute)
     case overlay(OverlayAction)
     case ar(ARAction)
+    case onboarding(OnboardingAction) //added
 }
 
 // MARK: - Overlay Actions
