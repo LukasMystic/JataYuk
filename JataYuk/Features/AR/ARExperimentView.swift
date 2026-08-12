@@ -21,8 +21,12 @@ struct ARExperimentView: View {
 
     var body: some View {
         ZStack {
-            ARViewContainer(store: store)
-                .ignoresSafeArea()
+            ARViewContainer(
+                store: store,
+                sessionResetToken: store.state.ar.sessionResetToken,
+                isPaused: store.state.ar.isPaused
+            )
+            .ignoresSafeArea()
 
             VStack {
                 placementStatusView
@@ -45,6 +49,34 @@ struct ARExperimentView: View {
                 }
             }
             .padding(.trailing, 20)
+
+            // Pause button — top-right corner, only after all items placed
+            if store.state.ar.placement == .allPlaced && !store.state.ar.isPaused {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button {
+                            store.send(.ar(.pauseSession))
+                        } label: {
+                            Image(systemName: "pause.fill")
+                                .font(.title2)
+                                .padding(12)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Circle())
+                                .foregroundColor(.white)
+                        }
+                    }
+                    Spacer()
+                }
+                .padding()
+            }
+
+            // Pause overlay
+            if store.state.ar.isPaused {
+                PauseOverlayView(store: store)
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.2), value: store.state.ar.isPaused)
+            }
         }
         #if DEBUG
         .onDisappear { motionObserver.stop() }
