@@ -34,6 +34,7 @@ struct MainPageView: View {
                     set: { store.send(.tabSelected($0)) }
                 )
             )
+            .glassEffect()
 
             Spacer()
 
@@ -41,10 +42,8 @@ struct MainPageView: View {
                 store.send(.settingsButtonTapped)
             } label: {
                 Image(systemName: "gearshape.fill")
-                    .font(.title2)
-                    .foregroundStyle(.black.opacity(0.8))
-            }
-            .accessibilityLabel("Settings")
+                    .font(.title)
+                    .foregroundStyle(.black)            }
         }
     }
 
@@ -69,17 +68,17 @@ struct MainPageView: View {
     }
 
     private var achievementsPlaceholder: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "rosette")
+        VStack(spacing: 50) {
+            Image(systemName: "medal.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
 
             Text("Achievements coming soon")
-                .font(.subheadline)
+                .font(.system(size: 25))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 60)
+        .padding(.vertical, 100)
     }
 }
 
@@ -93,26 +92,30 @@ struct DuARSegmentedControl: View {
         HStack(spacing: 4) {
             ForEach(tabs) { tab in
                 Text(tab.rawValue)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.black)
+                    //.font(.custom("Fredoka-Bold", size: 15))
+                    .font(.system(size: 20,weight: .heavy, design: .rounded))
+                    .foregroundStyle(
+                        selection == tab ? .black : .primary
+                    )
                     .padding(.vertical, 10)
                     .padding(.horizontal, 20)
-                    .background(
-                        Capsule().fill(Color.black.opacity(0.06))
-                    )
+                    .background {
+                        if selection == tab {
+                            Capsule().fill(Color(red: 0.949, green: 0.729, blue: 0.216))}}
+                    .contentShape(Capsule())
                     .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                             selection = tab
                         }
                     }
             }
         }
-        .padding(4)
-        .background(Capsule().fill(Color.black.opacity(0.04)))
+        .padding(6)
+        .background(.ultraThinMaterial, in: Capsule())
     }
 }
 
-#Preview {
+#Preview (traits: .landscapeLeft) {
     MainPageView(
         store: Store(
             initialState: MainPageState(),

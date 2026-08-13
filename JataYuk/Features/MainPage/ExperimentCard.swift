@@ -35,6 +35,11 @@ enum ExperimentData {
             category: "Chemistry",
             title: "Crystal Growth",
             //mascotImageName: "duar_experiment_crystal_growth"
+        ),
+        ExperimentCard(
+            category: "Physics",
+            title: "Solar System",
+            //mascotImageName: "duar_experiment_crystal_growth"
         )
     ]
 }
@@ -48,25 +53,14 @@ struct ExperimentCardView: View {
         ZStack(alignment: .bottomLeading) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(experiment.category.uppercased())
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 24, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.85))
 
                 Text(experiment.title)
-                    .font(
-                        .system(
-                            size: 24,
-                            weight: .heavy,
-                            design: .rounded
-                        )
-                    )
-                    .foregroundStyle(Color(
-                        red: 0.949,
-                        green: 0.729,
-                        blue: 0.216)) //yellow
-                    .fixedSize(
-                        horizontal: false,
-                        vertical: true
-                    )
+                    //.font(.custom("Fredoka-Bold", size: 35))
+                    .font(.system(size: 35,weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color(red: 0.949, green: 0.729, blue: 0.216)) //yellow
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 0)
 
@@ -94,16 +88,10 @@ struct ExperimentCardView: View {
 
     private var playButton: some View {
         Button(action: onPlayTapped) {
-            Image(systemName: "play.fill")
-                .font(.system(size: 16, weight: .bold))
+            Image(systemName: "play.circle")
+                .font(.system(size: 64, weight: .bold))
                 .foregroundStyle(.white)
-                .frame(width: 44, height: 44)
-                .background(
-                    Circle()
-                        .stroke(.white, lineWidth: 2)
-                )
         }
-        .accessibilityLabel("Play \(experiment.title)")
     }
 }
 
@@ -112,6 +100,5 @@ struct ExperimentCardView: View {
         experiment: ExperimentData.experiments[0],
         onPlayTapped: {}
     )
-    //.padding()
-    //.background(DuARColor.cream)
 }
+

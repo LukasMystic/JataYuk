@@ -17,31 +17,19 @@ struct LoadingPageView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Color(
-                        red: 0.965,
-                        green: 0.945,
-                        blue: 0.902
-                    )
+                Color(red: 0.965, green: 0.945, blue: 0.902)
                     .ignoresSafeArea()
 
                     Image("VolcanoBackground")
                         .resizable()
                         .scaledToFill()
-                        .frame(
-                                    width: geometry.size.width,
-                                    height: geometry.size.height * 0.85
-                                )
-                                .clipped()
-                                .frame(
-                                    maxHeight: .infinity,
-                                    alignment: .bottom
-                                )
+                        .frame(width: geometry.size.width,
+                               height: geometry.size.height * 0.85)
+                                .frame(maxHeight: .infinity, alignment: .bottom)
 
                 VStack(spacing: 18) {
                     Spacer()
-                        .frame(
-                            height: geometry.size.height * 0.25
-                        )
+                        .frame(height: geometry.size.height * 0.25)
 
                     currentGuideCard
                         .frame(height: 550)
@@ -49,17 +37,12 @@ struct LoadingPageView: View {
 
                     pageDots
 
-                    progressBar
-                        .frame(maxWidth: 420)
-
+                    progressBar .frame(maxWidth: 420)
+                    
                     Spacer()
                 }
             }
         }
-        .frame(
-            maxWidth: .infinity,
-            maxHeight: .infinity
-        )
         .ignoresSafeArea()
         .onAppear {
             store.send(.onAppear)
@@ -109,13 +92,7 @@ struct LoadingPageView: View {
                     .fill(Color.black.opacity(0.15))
 
                 Capsule()
-                    .fill(
-                        Color(
-                            red: 0.949,
-                            green: 0.729,
-                            blue: 0.216
-                        )
-                    )
+                    .fill(Color( red: 0.949, green: 0.729, blue: 0.216))
                     .frame(
                         width: geometry.size.width
                             * store.state.progress

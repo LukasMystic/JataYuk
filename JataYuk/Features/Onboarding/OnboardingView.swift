@@ -44,23 +44,15 @@ struct OnboardingView: View {
             store.send(.onboarding(.letsExploreTapped))
         } label: {
             Text("Let's Explore!")
-                .font(.system(size: 25, weight: .bold, design: .rounded))
+                //.font(.custom("Fredoka-Bold", size: 20))
+                .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: .infinity)
                 .padding(.vertical, 20)
                 .padding(.horizontal, 30)
-
-                
+                .glassEffect(.regular.interactive().tint(Color(red: 0.949, green: 0.729, blue: 0.216))
+                )
         }
-        .buttonStyle(.glassProminent)
-        .tint(
-            Color(
-                red: 0.949,
-                green: 0.729,
-                blue: 0.216
-            )
-        )
-        .accessibilityLabel("Let's Explore")
     }
 }
 
