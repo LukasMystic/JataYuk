@@ -42,8 +42,11 @@ final class ARCoordinator: NSObject {
     var carriedEntityOriginalParent: Entity?
     var carriedEntityOriginalLocalPos: SIMD3<Float> = .zero
 
-    // Foam SPH simulation (live after allPlaced, nil otherwise)
-    var foamSPHSystem: FoamSPHSystem?
+    // Explosion ECS/TCA runtime (live after allPlaced, nil otherwise)
+    var explosionStore: ExplosionStore?
+    var emissionSystem: EmissionSystem?
+    var sphSystem: SPHSystem?
+    var foamEntity: Entity?
     var lastSeenVolcanoState: VolcanoState = .locked
 
     // Tracks last reset token and pause state so updateUIView can detect changes.
