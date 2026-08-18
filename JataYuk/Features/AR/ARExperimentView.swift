@@ -38,6 +38,14 @@ struct ARExperimentView: View {
             }
             .padding()
             
+            //Added - Instruction Bubble
+            VStack {
+                InstructionView(step: InstructionDerivation.currentInstruction(for: store.state))
+                    .padding(.top, 150)
+                Spacer()
+            }
+            .padding(.horizontal, 60)
+            
             VStack{
                 Spacer()
                 

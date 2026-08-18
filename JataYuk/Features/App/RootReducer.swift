@@ -65,14 +65,22 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
     case .ingredientProximityChanged(let side, let index, let proximity):
         guard index < state.experiment[side].ingredients.count else { break }
         state.experiment[side].ingredients[index].proximityState = proximity
+        if proximity != .far {
+            state.ar.activeStation = side
+        }
 
     case .mixingBeakerProximityChanged(let side, let proximity):
         state.experiment[side].mixingBeaker.proximityState = proximity
+        if proximity != .far {
+            state.ar.activeStation = side
+        }
 
     case .pickupIngredient(let side, let index):
         guard index < state.experiment[side].ingredients.count else { break }
         state.experiment[side].ingredients[index].proximityState = .inHand
         state.ar.activeStation = side
+        if side == .sideA { state.experiment.hasSeenSideAIntro = true }   //added
+           else               { state.experiment.hasSeenSideBIntro = true } //added
         // gray out all other ingredients on the same side
         for i in state.experiment[side].ingredients.indices where i != index {
             if state.experiment[side].ingredients[i].grayOutReason == nil {
@@ -86,11 +94,12 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
                 state.experiment[opp].ingredients[i].grayOutReason = .stationLocked
             }
         }
+        state.experiment[side].ingredients[index].hasPouredThisPickup = false //added
 
     case .releaseIngredient(let side, let index):
         guard index < state.experiment[side].ingredients.count else { break }
         state.experiment[side].ingredients[index].proximityState = .far
-        state.ar.activeStation = nil
+        // state.ar.activeStation = nil
         // clear transient reasons — depleted stays depleted
         for i in state.experiment[side].ingredients.indices {
             if state.experiment[side].ingredients[i].grayOutReason == .anotherInHand {
@@ -103,6 +112,7 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
                 state.experiment[opp].ingredients[i].grayOutReason = nil
             }
         }
+        state.experiment[side].ingredients[index].hasPouredThisPickup = false //added
 
     case .pourIngredient(let side, let index):
         guard index < state.experiment[side].ingredients.count else { break }
@@ -110,6 +120,7 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
         let ingredient = state.experiment[side].ingredients[index]
         let type = ingredient.type
         state.experiment[side].ingredients[index].pourCount += 1
+        state.experiment[side].ingredients[index].hasPouredThisPickup = true  //added
         state.experiment[side].mixingBeaker.contents.append(type)
         if state.experiment[side].ingredients[index].isDepleted {
             state.experiment[side].ingredients[index].grayOutReason = .depleted
@@ -144,6 +155,7 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
         case .yeast:   state.experiment.foam.yeastTbsp  += ingredient.amountPerPour
         case .water, .foodColoring: break
         }
+        state.experiment[side].ingredients[index].hasPouredThisPickup = true //added
 
     case .selectH2O2Variant(let variant):
         // permanently gray out the two unselected h2o2 variants
