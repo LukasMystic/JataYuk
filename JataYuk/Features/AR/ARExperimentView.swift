@@ -38,7 +38,15 @@ struct ARExperimentView: View {
                 debugControlsView
             }
             .padding()
-
+            
+            //Added - Instruction Bubble
+            VStack {
+                InstructionView(step: InstructionDerivation.currentInstruction(for: store.state))
+                    .padding(.top, 150)
+                Spacer()
+            }
+            .padding(.horizontal, 60)
+            
             // Interact button pinned to the right edge, vertically centered
             HStack {
                 Spacer()
