@@ -12,13 +12,21 @@ func rootReducer(state: inout RootState, action: RootAction, environment: RootEn
     case .navigate(let route):
         state.currentRoute = route
         return []
-
+        
     case .overlay(let overlayAction):
         return overlayReducer(state: &state, action: overlayAction)
-
+        
     case .ar(let arAction):
         return arReducer(state: &state, action: arAction)
+        
+    case .onboarding(let OnboardingAction):
+        return OnboardingReducer(
+            state: &state,
+            action: OnboardingAction,
+            environment: environment
+        ) //added
     }
+
 }
 
 // MARK: - Overlay
