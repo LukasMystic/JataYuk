@@ -31,7 +31,6 @@ struct ARExperimentView: View {
             VStack {
                 placementStatusView
                 Spacer()
-                inHandInfoButton
                 #if DEBUG
                 debugMotionOverlay
                 #endif
@@ -47,6 +46,17 @@ struct ARExperimentView: View {
             }
             .padding(.horizontal, 60)
             
+            VStack{
+                Spacer()
+                
+                HStack {
+                    inHandInfoButton
+                    Spacer()
+                }
+            }
+            .padding(.leading, 24)
+            .padding(.bottom, 24)
+
             // Interact button pinned to the right edge, vertically centered
             HStack {
                 Spacer()
@@ -63,16 +73,19 @@ struct ARExperimentView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Button {
-                            store.send(.ar(.pauseSession))
-                        } label: {
+                        Button {store.send(.ar(.pauseSession))}
+                        label: {
                             Image(systemName: "pause.fill")
-                                .font(.title2)
-                                .padding(12)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Circle())
-                                .foregroundColor(.white)
+                                .font(.system(size: 20, weight: .semibold))
+                                //.foregroundStyle(.black)
+                                .frame(width: 57, height: 57)
                         }
+                        .buttonStyle(.plain)
+                        .background {Capsule()
+                                .fill(Color(red: 0.949, green: 0.729, blue: 0.216).opacity(0.85)
+                                ).glassEffect()
+                        }
+                        .contentShape(Capsule())
                     }
                     Spacer()
                 }
@@ -235,13 +248,23 @@ struct ARExperimentView: View {
     private var inHandInfoButton: some View {
         if let (side, index) = heldIngredientSideIndex {
             let ing = store.state.experiment[side].ingredients[index]
-            Button("Info") {
+            Button {
                 store.send(.overlay(.showItemInfo(ing.type)))
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(.white)
-            .foregroundColor(.black)
-            .transition(.scale.combined(with: .opacity))
+            }label:{
+                Image(systemName: "info")
+                    .font(.system(size: 20, weight: .semibold))
+                    //.foregroundStyle(.black)
+                    .frame(width: 57, height: 57)
+                    }
+                    .buttonStyle(.plain)
+                    .background {
+                        Capsule().fill(Color(red: 0.949,green: 0.729,blue: 0.216)
+                                .opacity(0.85)
+                            )
+                            .glassEffect()
+                    }
+                    .contentShape(Capsule())
+                    .transition(.scale.combined(with: .opacity))
         }
     }
 
@@ -307,11 +330,11 @@ struct ARExperimentView: View {
                 .tint(.white)
             }
 
-            Button("?") {
-                store.send(.overlay(.showInstruction))
-            }
-            .buttonStyle(.bordered)
-            .tint(.white)
+//            Button("?") {
+//                store.send(.overlay(.showInstruction))
+//            }
+//            .buttonStyle(.bordered)
+//            .tint(.white)
         }
     }
 

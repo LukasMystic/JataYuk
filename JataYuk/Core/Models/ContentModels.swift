@@ -39,9 +39,8 @@ struct InstructionStep: Equatable, Identifiable {
 }
 
 struct ItemInfo: Equatable {
-    let beakerType: BeakerType
-    let title: String
-    let description: String
-    let scienceFact: String
-    let imageName: String
+    var beakerType: BeakerType
+    var title: String
+    var description: String
+    var sections: [ItemInfoSection] //sciencefact is divided into sections
 }

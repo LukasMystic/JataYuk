@@ -15,37 +15,43 @@ struct PauseOverlayView: View {
             Color.black.opacity(0.6)
                 .ignoresSafeArea()
                 .background(.ultraThinMaterial)
-
-            VStack(spacing: 24) {
+            
+            //Image("VolcanoBckg").resizeable().scaledtoFill()
+            
+            VStack(spacing: 80) {
                 Text("Need a Break?")
-                    .font(.largeTitle.bold())
-                    .foregroundColor(.yellow)
+                    .font(.system(size: 64, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(red: 0.949, green: 0.729, blue: 0.216))
+    
 
-                VStack(spacing: 16) {
-                    pauseButton("Resume", tint: .yellow) {
+                VStack(spacing: 40) {
+                    pauseButton("Resume", tint: Color(red: 0.949, green: 0.729, blue: 0.216)) {
                         store.send(.ar(.resumeSession))
                     }
-                    pauseButton("Restart", tint: .yellow) {
+                    pauseButton("Restart", tint: Color(red: 0.949, green: 0.729, blue: 0.216)) {
                         store.send(.ar(.resetSession))
                     }
-                    pauseButton("Quit", tint: .yellow) {
+                    pauseButton("Quit", tint: Color(red: 0.949, green: 0.729, blue: 0.216)) {
                         store.send(.navigate(to: .onboarding))
                     }
                 }
+                
             }
-            .padding(40)
+            .padding(80)
         }
     }
 
     private func pauseButton(_ label: String, tint: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
-                .font(.title3.bold())
-                .frame(maxWidth: 260)
-                .padding(.vertical, 14)
-                .background(tint)
-                .foregroundColor(.black)
-                .cornerRadius(12)
+                .font(.system(size: 24, weight: .semibold))
+                //.foregroundStyle(.black)
+                .frame(maxWidth: .infinity)
+                .frame(width: 382, height: 64)
         }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.tint(Color(red: 0.949, green: 0.729, blue: 0.216))
+        )
+        .contentShape(Capsule())
     }
 }
