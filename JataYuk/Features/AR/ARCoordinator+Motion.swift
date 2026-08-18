@@ -69,7 +69,7 @@ extension ARCoordinator {
     }
 
     // Quick left-right oscillation to visualise the mixing action.
-    func animateBeakerMix(_ entity: ModelEntity) {
+    func animateBeakerMix(_ entity: Entity) {
         let origin = entity.position
         let d: Float = 0.012
         Task {

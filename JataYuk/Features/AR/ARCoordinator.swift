@@ -30,8 +30,9 @@ final class ARCoordinator: NSObject {
     var stationBPosition: SIMD3<Float>?
 
     // Direct entity references for visual-only updates (avoids anchor.children traversal).
-    var volcanoEntity: ModelEntity?
-    var beakerEntities: [StationSide: ModelEntity] = [:]
+    var volcanoEntity: Entity?
+    var beakerEntities: [StationSide: Entity] = [:]
+    var isPlacing = false
 
     let motionClient = MotionClient()
     var cancellables = Set<AnyCancellable>()
@@ -92,6 +93,7 @@ final class ARCoordinator: NSObject {
         volcanoPosition = nil; stationAPosition = nil; stationBPosition = nil
         volcanoEntity = nil; beakerEntities.removeAll()
         planeEntities.removeAll()
+        isPlacing = false
 
         lastSeenResetToken = store.state.ar.sessionResetToken
         lastSeenIsPaused = false       // prevent stale pause state from triggering resumeARSession()

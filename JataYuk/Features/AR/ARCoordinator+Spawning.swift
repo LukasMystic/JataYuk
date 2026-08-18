@@ -10,40 +10,54 @@ import UIKit
 
 extension ARCoordinator {
 
-    func spawnInteractiveEntities() {
+    func spawnInteractiveEntities() async {
         if let anchorA = stationAAnchor {
-            spawnIngredients(store.state.experiment.stationA.ingredients, on: anchorA, side: .sideA)
-            spawnMixingBeaker(on: anchorA, side: .sideA)
+            await spawnIngredients(store.state.experiment.stationA.ingredients, on: anchorA, side: .sideA)
+            if beakerEntities[.sideA] == nil {
+                await spawnMixingBeaker(on: anchorA, side: .sideA)
+            }
         }
         if let anchorB = stationBAnchor {
-            spawnIngredients(store.state.experiment.stationB.ingredients, on: anchorB, side: .sideB)
-            spawnMixingBeaker(on: anchorB, side: .sideB)
+            await spawnIngredients(store.state.experiment.stationB.ingredients, on: anchorB, side: .sideB)
+            if beakerEntities[.sideB] == nil {
+                await spawnMixingBeaker(on: anchorB, side: .sideB)
+            }
         }
     }
 
-    func spawnIngredients(_ ingredients: [Ingredient], on anchor: AnchorEntity, side: StationSide) {
-        let spacing: Float = 0.065
+    func spawnIngredients(_ ingredients: [Ingredient], on anchor: AnchorEntity, side: StationSide) async {
+        let spacing: Float = 0.18
         let startX = -Float(ingredients.count - 1) * spacing / 2
         for (i, ingredient) in ingredients.enumerated() {
-            let entity = ModelEntity(
-                mesh: .generateSphere(radius: 0.027),
-                materials: [SimpleMaterial(color: ingredientColor(ingredient.type), isMetallic: false)]
-            )
-            entity.position = SIMD3(startX + Float(i) * spacing, 0.06, 0)
+            let entity = await loadIngredientEntity(ingredient.type)
+            entity.position = SIMD3(startX + Float(i) * spacing, 0, 0)
             entity.components.set(IngredientComponent(side: side, ingredientIndex: i))
             anchor.addChild(entity)
         }
     }
 
-    func spawnMixingBeaker(on anchor: AnchorEntity, side: StationSide) {
-        let entity = ModelEntity(
-            mesh: .generateCylinder(height: 0.07, radius: 0.032),
-            materials: [SimpleMaterial(color: UIColor.systemGray.withAlphaComponent(0.5), isMetallic: false)]
+    func spawnMixingBeaker(on anchor: AnchorEntity, side: StationSide) async {
+        let entity = await loadAsset(
+            .beaker,
+            fallbackColor: UIColor.systemGray.withAlphaComponent(0.5),
+            fallbackSize: [0.064, 0.07, 0.064]
         )
-        entity.position = SIMD3(0, 0.07, -0.15)
+        entity.position = SIMD3(0, 0, -0.25)
         entity.components.set(MixingBeakerComponent(side: side))
         anchor.addChild(entity)
         beakerEntities[side] = entity
+    }
+
+    func loadIngredientEntity(_ type: BeakerType) async -> Entity {
+        do {
+            return try await ShaderDevAssets.loadIngredient(type)
+        } catch {
+            print("[ShaderDev] failed to load ingredient \(type): \(error)")
+            return makePlaceholder(
+                color: ingredientColor(type),
+                size: [0.054, 0.054, 0.054]
+            )
+        }
     }
 
     func ingredientColor(_ type: BeakerType) -> UIColor {
