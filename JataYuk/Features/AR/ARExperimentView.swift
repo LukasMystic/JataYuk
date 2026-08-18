@@ -55,16 +55,19 @@ struct ARExperimentView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Button {
-                            store.send(.ar(.pauseSession))
-                        } label: {
+                        Button {store.send(.ar(.pauseSession))}
+                        label: {
                             Image(systemName: "pause.fill")
-                                .font(.title2)
-                                .padding(12)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Circle())
-                                .foregroundColor(.white)
+                                .font(.system(size: 20, weight: .semibold))
+                                //.foregroundStyle(.black)
+                                .frame(width: 57, height: 57)
                         }
+                        .buttonStyle(.plain)
+                        .background {Capsule()
+                                .fill(Color(red: 0.949, green: 0.729, blue: 0.216).opacity(0.85)
+                                ).glassEffect()
+                        }
+                        .contentShape(Capsule())
                     }
                     Spacer()
                 }
