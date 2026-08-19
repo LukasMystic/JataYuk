@@ -11,6 +11,7 @@ enum RootAction {
     case navigate(to: AppRoute)
     case overlay(OverlayAction)
     case ar(ARAction)
+    case end(EndAction)
 }
 
 // MARK: - Overlay Actions
@@ -41,4 +42,14 @@ enum ARAction {
     case pauseSession
     case resumeSession
     case resetSession
+}
+
+
+// MARK: - EndPage Actions
+// Drives the 15s auto-reveal of the end screen overlay + eye toggle,
+// following the same start-timestamp + tick pattern as ARAction.reactionTick.
+
+enum EndAction {
+    case revealTick(Double)   // elapsed seconds since the volcano finished
+    case toggleOverlay
 }

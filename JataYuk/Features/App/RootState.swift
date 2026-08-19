@@ -17,6 +17,7 @@ struct RootState: Equatable {
     var currentRoute: AppRoute = .onboarding
     var ar: ARState = ARState()
     var experiment: ExperimentState = .initial()
+    var end: EndState = EndState()
     var hasSeenInstructions: Bool = false
     var isInstructionVisible: Bool = false
     var isItemInfoVisible: Bool = false
