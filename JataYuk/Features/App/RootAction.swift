@@ -12,9 +12,11 @@ enum RootAction {
     case overlay(OverlayAction)
     case ar(ARAction)
     case end(EndAction)
-    case onboarding(OnboardingAction) //added
+    case onboarding(OnboardingAction)
+    case loadingPage(LoadingPageAction)
+    case mainPage(MainPageAction)
+    case playButtonSound   // added
 }
-
 // MARK: - Overlay Actions
 
 enum OverlayAction {

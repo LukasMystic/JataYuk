@@ -22,6 +22,9 @@ extension ARCoordinator {
 
         if isTooClose(to: result.worldTransform) {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
+            if let nearestEntity = volcanoEntity ?? beakerEntities[.sideA] ?? beakerEntities[.sideB] {  // added
+                playSFX(.wrongPlacement, on: nearestEntity)             // added — best-effort position; refine once you have the actual invalid-tap location as an entity
+            }                                                            // added
             return
         }
 
@@ -59,18 +62,25 @@ extension ARCoordinator {
             volcanoAnchor = anchor
             volcanoPosition = pos
             volcanoEntity = volEnt
+            playSFX(.volcanoPlacement, on: volEnt)                    // added
 
         case .placingSideA:
             arView.scene.addAnchor(anchor)
             stationAAnchor = anchor
             stationAPosition = pos
             await spawnMixingBeaker(on: anchor, side: .sideA)
+            if let beaker = beakerEntities[.sideA] {                  // added
+                playSFX(.placeGlass(.sideA), on: beaker)               // added
+            }                                                          // added
 
         case .placingSideB:
             arView.scene.addAnchor(anchor)
             stationBAnchor = anchor
             stationBPosition = pos
             await spawnMixingBeaker(on: anchor, side: .sideB)
+            if let beaker = beakerEntities[.sideB] {                  // added
+                playSFX(.placeGlass(.sideB), on: beaker)               // added
+            }                                                          // added
 
         case .allPlaced:
             break

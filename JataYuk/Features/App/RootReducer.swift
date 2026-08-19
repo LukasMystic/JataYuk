@@ -4,21 +4,23 @@
 //
 //  Created by Stanley Pratama Teguh on 29/07/26.
 //
-
 import Foundation
 
 func rootReducer(state: inout RootState, action: RootAction, environment: RootEnvironment) -> [Effect] {
     switch action {
+    case .playButtonSound:
+        let soundClient = environment.soundClient
+        return [Effect { _ in await soundClient.playButtonPress() }]
     case .navigate(let route):
         state.currentRoute = route
-        return []
-        
+        return bgmEffects(for: route, environment: environment)
+
     case .overlay(let overlayAction):
         return overlayReducer(state: &state, action: overlayAction)
-        
+
     case .ar(let arAction):
-        return arReducer(state: &state, action: arAction)
-        
+        return arReducer(state: &state, action: arAction, environment: environment)
+
     case .end(let endAction):
             return endReducer(state: &state, action: endAction)
     case .onboarding(let OnboardingAction):
@@ -27,6 +29,22 @@ func rootReducer(state: inout RootState, action: RootAction, environment: RootEn
             action: OnboardingAction,
             environment: environment
         ) //added
+
+    case .loadingPage(let loadingPageAction):
+        var effects = LoadingPageReducer.reduce(state: &state.loadingPage, action: loadingPageAction, environment: environment)
+        if case .didFinishLoading = loadingPageAction {
+            state.currentRoute = .onboarding
+            effects += bgmEffects(for: .onboarding, environment: environment)
+        }
+        return effects
+
+    case .mainPage(let mainPageAction):
+        var effects = MainPageReducer.reduce(state: &state.mainPage, action: mainPageAction, environment: environment)
+        if case .playButtonTapped = mainPageAction {
+            state.currentRoute = .ar
+            effects += bgmEffects(for: .ar, environment: environment)
+        }
+        return effects
     }
 
 }
@@ -53,7 +71,7 @@ private func overlayReducer(state: inout RootState, action: OverlayAction) -> [E
 
 // MARK: - AR
 
-private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
+private func arReducer(state: inout RootState, action: ARAction, environment: RootEnvironment) -> [Effect] {
     switch action {
 
     case .placementAdvanced:
@@ -209,9 +227,13 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
 
     case .pauseSession:
         state.ar.isPaused = true
+        let soundClient = environment.soundClient
+        return [Effect { _ in await soundClient.pause() }]
 
     case .resumeSession:
         state.ar.isPaused = false
+        let soundClient = environment.soundClient
+        return [Effect { _ in await soundClient.resume() }]
 
     case .resetSession:
         state.ar.placement = .placingVolcano
@@ -220,6 +242,8 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
         state.ar.sessionResetToken += 1
         state.experiment = .initial()
         state.end = EndState()
+        let soundClient = environment.soundClient
+        return [Effect { _ in await soundClient.resume() }]   // no-ops if it wasn't paused
     }
     return []
 }
@@ -239,6 +263,23 @@ private func endReducer(state: inout RootState, action: EndAction) -> [Effect] {
         state.end.isOverlayVisible.toggle()
     }
     return []
+}
+
+// MARK: - BGM
+
+func bgmEffects(for route: AppRoute, environment: RootEnvironment) -> [Effect] {
+    let soundClient = environment.soundClient
+    guard let track = bgmTrack(for: route) else { return [] }
+    return [Effect { _ in await soundClient.play(track) }]
+}
+
+func bgmTrack(for route: AppRoute) -> BGMTrack? {
+    switch route {
+    case .loading, .onboarding: return .onboarding
+    case .main:                 return .main
+    case .ar:                   return .experiment
+    case .end:                  return nil
+    }
 }
 
 // MARK: - Helpers

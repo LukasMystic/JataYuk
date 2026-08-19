@@ -16,6 +16,8 @@ final class ARCoordinator: NSObject {
     weak var arView: ARView?
     let store: Store<RootState, RootAction>
 
+    // dictionary containing sounds that have already been loaded.
+    var preloadedSFX: [SoundEffect: AudioFileResource] = [:]
     // Plane visualizations keyed by ARPlaneAnchor identifier
     var planeEntities: [UUID: AnchorEntity] = [:]
 

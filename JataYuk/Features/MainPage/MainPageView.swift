@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MainPageView: View {
-    @ObservedObject var store: Store<MainPageState, MainPageAction>
+    @ObservedObject var store: Store<RootState, RootAction>
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -30,8 +30,8 @@ struct MainPageView: View {
             DuARSegmentedControl(
                 tabs: MainPageTab.allCases,
                 selection: Binding(
-                    get: { store.state.selectedTab },
-                    set: { store.send(.tabSelected($0)) }
+                    get: { store.state.mainPage.selectedTab },
+                    set: { store.send(.mainPage(.tabSelected($0))) }
                 )
             )
             .glassEffect()
@@ -39,7 +39,7 @@ struct MainPageView: View {
             Spacer()
 
             Button {
-                store.send(.settingsButtonTapped)
+                store.send(.mainPage(.settingsButtonTapped))
             } label: {
                 Image(systemName: "gearshape.fill")
                     .font(.title)
@@ -49,13 +49,18 @@ struct MainPageView: View {
 
     @ViewBuilder
     private var experimentsRow: some View {
-        switch store.state.selectedTab {
+        switch store.state.mainPage.selectedTab {
         case .experiments:
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 24) {
-                    ForEach(store.state.experiments) { experiment in
+                    ForEach(store.state.mainPage.experiments) { experiment in
                         ExperimentCardView(experiment: experiment) {
-                            store.send(.playButtonTapped(experiment))
+                            store.send(.playButtonSound)
+                            if !store.state.hasSeenInstructions {
+                                store.send(.overlay(.showInstruction))
+                                store.send(.overlay(.markInstructionsSeen))
+                            }
+                            store.send(.navigate(to: .ar))
                         }
                     }
                 }
@@ -118,8 +123,8 @@ struct DuARSegmentedControl: View {
 #Preview (traits: .landscapeLeft) {
     MainPageView(
         store: Store(
-            initialState: MainPageState(),
-            reducer: MainPageReducer.reduce,
+            initialState: RootState(currentRoute: .main),
+            reducer: rootReducer,
             environment: RootEnvironment()
         )
     )
