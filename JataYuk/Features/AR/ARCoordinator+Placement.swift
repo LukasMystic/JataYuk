@@ -14,6 +14,7 @@ extension ARCoordinator {
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
         guard let arView else { return }
         guard store.state.ar.placement != .allPlaced else { return }
+        guard !isPlacing else { return }
 
         let location = gesture.location(in: arView)
         let results = arView.raycast(from: location, allowing: .estimatedPlane, alignment: .horizontal)
@@ -24,30 +25,35 @@ extension ARCoordinator {
             return
         }
 
-        placeCurrentItem(at: result.worldTransform, in: arView)
-        store.send(.ar(.placementAdvanced))
+        isPlacing = true
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer { isPlacing = false }
+            await placeCurrentItem(at: result.worldTransform, in: arView)
+            store.send(.ar(.placementAdvanced))
 
-        if store.state.ar.placement == .allPlaced {
-            hidePlaneVisualizations()
-            // Stop plane detection — world tracking continues so placed entities stay put.
-            let frozenConfig = ARWorldTrackingConfiguration()
-            frozenConfig.planeDetection = []
-            arView.session.run(frozenConfig)
-            startTiltMonitoring()
-            startShakeMonitoring()
-            spawnInteractiveEntities()
-            setupExplosionSystem()
-            subscribeToProximityUpdates()
+            if store.state.ar.placement == .allPlaced {
+                hidePlaneVisualizations()
+                // Stop plane detection — world tracking continues so placed entities stay put.
+                let frozenConfig = ARWorldTrackingConfiguration()
+                frozenConfig.planeDetection = []
+                arView.session.run(frozenConfig)
+                startTiltMonitoring()
+                startShakeMonitoring()
+                await spawnInteractiveEntities()
+                setupExplosionSystem()
+                subscribeToProximityUpdates()
+            }
         }
     }
 
-    func placeCurrentItem(at transform: simd_float4x4, in arView: ARView) {
+    func placeCurrentItem(at transform: simd_float4x4, in arView: ARView) async {
         let anchor = AnchorEntity(world: transform)
         let pos = SIMD3<Float>(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
 
         switch store.state.ar.placement {
         case .placingVolcano:
-            let volEnt = makePlaceholder(color: .systemGray.withAlphaComponent(0.4), size: [0.1, 0.2, 0.1])
+            let volEnt = await loadAsset(.snowyVolcano, fallbackColor: .systemGray.withAlphaComponent(0.4), fallbackSize: [0.1, 0.2, 0.1])
             anchor.addChild(volEnt)
             arView.scene.addAnchor(anchor)
             volcanoAnchor = anchor
@@ -55,16 +61,16 @@ extension ARCoordinator {
             volcanoEntity = volEnt
 
         case .placingSideA:
-            anchor.addChild(makePlaceholder(color: .systemBlue, size: [0.35, 0.04, 0.2]))
             arView.scene.addAnchor(anchor)
             stationAAnchor = anchor
             stationAPosition = pos
+            await spawnMixingBeaker(on: anchor, side: .sideA)
 
         case .placingSideB:
-            anchor.addChild(makePlaceholder(color: .systemGreen, size: [0.35, 0.04, 0.2]))
             arView.scene.addAnchor(anchor)
             stationBAnchor = anchor
             stationBPosition = pos
+            await spawnMixingBeaker(on: anchor, side: .sideB)
 
         case .allPlaced:
             break
@@ -84,6 +90,19 @@ extension ARCoordinator {
             mesh: .generateBox(size: size, cornerRadius: 0.005),
             materials: [SimpleMaterial(color: color.withAlphaComponent(0.85), isMetallic: false)]
         )
+    }
+
+    func loadAsset(
+        _ asset: ShaderDevAsset,
+        fallbackColor: UIColor,
+        fallbackSize: SIMD3<Float>
+    ) async -> Entity {
+        do {
+            return try await ShaderDevAssets.load(asset)
+        } catch {
+            print("[ShaderDev] failed to load \(asset.rawValue): \(error)")
+            return makePlaceholder(color: fallbackColor, size: fallbackSize)
+        }
     }
 
     func hidePlaneVisualizations() {
