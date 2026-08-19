@@ -9,7 +9,6 @@ import Foundation
 
 enum MainPageTab: String, CaseIterable, Identifiable {
     case experiments = "Experiments"
-    case achievements = "My Achievements"
 
     var id: String {
         rawValue

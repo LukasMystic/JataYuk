@@ -11,46 +11,73 @@ struct PauseOverlayView: View {
     @ObservedObject var store: Store<RootState, RootAction>
 
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.6)
-                .ignoresSafeArea()
-                .background(.ultraThinMaterial)
-            
-            //Image("VolcanoBckg").resizeable().scaledtoFill()
-            
-            VStack(spacing: 80) {
-                Text("Need a Break?")
-                    .font(.system(size: 64, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(red: 0.949, green: 0.729, blue: 0.216))
-    
+        GeometryReader { geometry in
+            ZStack {
+                // Blur layer
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .ignoresSafeArea()
+                
+                // Background
+                Image("VolcanoBackground")
+                    .resizable()
+                    .scaleEffect(1.20)
+                    .frame(
+                        width: geometry.size.width,
+                        height: geometry.size.height * 0.85
+                    )
+                    .frame(
+                        maxHeight: .infinity,
+                        alignment: .bottom
+                    )
+                    .opacity(0.50)
 
-                VStack(spacing: 40) {
-                    pauseButton("Resume", tint: Color(red: 0.949, green: 0.729, blue: 0.216)) {
-                        store.send(.ar(.resumeSession))
-                    }
-                    pauseButton("Restart", tint: Color(red: 0.949, green: 0.729, blue: 0.216)) {
-                        store.send(.ar(.resetSession))
-                    }
-                    pauseButton("Quit", tint: Color(red: 0.949, green: 0.729, blue: 0.216)) {
-                        store.send(.navigate(to: .onboarding))
+
+                // Dark layer
+                Color.black
+                    .opacity(0.3)
+                    .ignoresSafeArea()
+
+                // Controls
+                VStack(spacing: 80) {
+                    Text("Need a Break?")
+                        .font(.custom("Fredoka-Bold", size: 64))
+                        .foregroundStyle(customColors.appYellow)
+
+                    VStack(spacing: 40) {
+                        pauseButton("Resume", tint: customColors.appYellow) {
+                            store.send(.ar(.resumeSession))
+                        }
+
+                        pauseButton("Restart", tint: customColors.appYellow) {
+                            store.send(.ar(.resetSession))
+                        }
+
+                        pauseButton("Quit", tint: customColors.appYellow) {
+                            store.send(.navigate(to: .onboarding))
+                        }
                     }
                 }
-                
+                .frame(
+                    width: geometry.size.width,
+                    height: geometry.size.height,
+                    alignment: .center
+                )
             }
-            .padding(80)
+            .ignoresSafeArea()
         }
     }
 
     private func pauseButton(_ label: String, tint: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
-                .font(.system(size: 24, weight: .semibold))
-                //.foregroundStyle(.black)
+                .font(.custom("Fredoka-Medium", size:24))
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(width: 382, height: 64)
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.tint(Color(red: 0.949, green: 0.729, blue: 0.216))
+        .glassEffect(.regular.tint(customColors.appYellow)
         )
         .contentShape(Capsule())
     }
