@@ -1,0 +1,1050 @@
+{
+  "014038A3-2330-4115-BE0F-0316907A52FB" : {
+    "objectMetadataList" : [
+      [
+        "014038A3-2330-4115-BE0F-0316907A52FB",
+        "root",
+        "SM_Bottle_Dishsoap",
+        "SM_Liquid_Dishsoap"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "014038A3-2330-4115-BE0F-0316907A52FB",
+        "root",
+        "SM_Bottle_Dishsoap"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "014038A3-2330-4115-BE0F-0316907A52FB",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "014038A3-2330-4115-BE0F-0316907A52FB",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "014038A3-2330-4115-BE0F-0316907A52FB",
+        "root",
+        "SM_Bottle_Dishsoap",
+        "Cylinder_007"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "11F97CD2-7C58-42D8-BAF0-552E73DADB41" : {
+    "objectMetadataList" : [
+      [
+        "11F97CD2-7C58-42D8-BAF0-552E73DADB41",
+        "root",
+        "M_Glass"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "11F97CD2-7C58-42D8-BAF0-552E73DADB41",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "11F97CD2-7C58-42D8-BAF0-552E73DADB41",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "11F97CD2-7C58-42D8-BAF0-552E73DADB41",
+        "root",
+        "SM_Glass_Erlenmeyer"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "2A5FC17F-4985-4059-9A9A-37C6F8BA0B20" : {
+    "objectMetadataList" : [
+      [
+        "2A5FC17F-4985-4059-9A9A-37C6F8BA0B20",
+        "root",
+        "SM_Spoon"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "2A5FC17F-4985-4059-9A9A-37C6F8BA0B20",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "2A5FC17F-4985-4059-9A9A-37C6F8BA0B20",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "2C5EDC68-0443-483A-AF33-EC3D8D70C28D" : {
+    "objectMetadataList" : [
+      [
+        "2C5EDC68-0443-483A-AF33-EC3D8D70C28D",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "2C5EDC68-0443-483A-AF33-EC3D8D70C28D",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "2C5EDC68-0443-483A-AF33-EC3D8D70C28D",
+        "root",
+        "SM_Bottle_Dishsoap"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "2C5EDC68-0443-483A-AF33-EC3D8D70C28D",
+        "root",
+        "SM_Bottle_Dishsoap",
+        "Cylinder_007"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "2C5EDC68-0443-483A-AF33-EC3D8D70C28D",
+        "root",
+        "SM_Bottle_Dishsoap",
+        "SM_Liquid_Dishsoap"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "2C5EDC68-0443-483A-AF33-EC3D8D70C28D",
+        "root",
+        "_materials",
+        "M_Water"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "308B34A4-E2E3-429A-9CF2-CEDFE9A45EF9" : {
+    "objectMetadataList" : [
+      [
+        "308B34A4-E2E3-429A-9CF2-CEDFE9A45EF9",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "308B34A4-E2E3-429A-9CF2-CEDFE9A45EF9",
+        "root",
+        "SM_Kettle",
+        "SM_Liquid_Kettle"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "308B34A4-E2E3-429A-9CF2-CEDFE9A45EF9",
+        "root",
+        "SM_Kettle"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "308B34A4-E2E3-429A-9CF2-CEDFE9A45EF9",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "308B34A4-E2E3-429A-9CF2-CEDFE9A45EF9",
+        "root",
+        "SM_Kettle",
+        "_3DGeom_1_Defintion_001"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "486955B3-DCD6-4F85-96F1-A78FE55CFAC2" : {
+    "objectMetadataList" : [
+      [
+        "486955B3-DCD6-4F85-96F1-A78FE55CFAC2",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "486955B3-DCD6-4F85-96F1-A78FE55CFAC2",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "486955B3-DCD6-4F85-96F1-A78FE55CFAC2",
+        "root",
+        "SM_Glass_Erlenmeyer"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "54781DB9-BCC7-4775-9A4F-05C7093C86CA" : {
+    "objectMetadataList" : [
+      [
+        "54781DB9-BCC7-4775-9A4F-05C7093C86CA",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "54781DB9-BCC7-4775-9A4F-05C7093C86CA",
+        "root",
+        "SM_Glass_Beaker",
+        "SM_Liquid_Beaker"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "54781DB9-BCC7-4775-9A4F-05C7093C86CA",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "54781DB9-BCC7-4775-9A4F-05C7093C86CA",
+        "root",
+        "_materials",
+        "Custom_Glass"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "54781DB9-BCC7-4775-9A4F-05C7093C86CA",
+        "root",
+        "SM_Glass_Beaker"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "5692AE35-FE38-401A-A4C6-8615811642F6" : {
+    "objectMetadataList" : [
+      [
+        "5692AE35-FE38-401A-A4C6-8615811642F6",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "5692AE35-FE38-401A-A4C6-8615811642F6",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "5692AE35-FE38-401A-A4C6-8615811642F6",
+        "root",
+        "M_Chrome"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "5692AE35-FE38-401A-A4C6-8615811642F6",
+        "root",
+        "SM_Spoon"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "60874E53-F5F2-4D02-9A07-85E609BF8A52" : {
+    "objectMetadataList" : [
+      [
+        "60874E53-F5F2-4D02-9A07-85E609BF8A52",
+        "root",
+        "SM_Glass_Florence"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "60874E53-F5F2-4D02-9A07-85E609BF8A52",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "60874E53-F5F2-4D02-9A07-85E609BF8A52",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "68370187-3A59-4BA6-ACCA-BCD456EE7140" : {
+    "objectMetadataList" : [
+      [
+        "68370187-3A59-4BA6-ACCA-BCD456EE7140",
+        "root",
+        "SM_Bottle_Dishsoap"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "68370187-3A59-4BA6-ACCA-BCD456EE7140",
+        "root",
+        "SM_Bottle_Dishsoap",
+        "Cylinder_007"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "68370187-3A59-4BA6-ACCA-BCD456EE7140",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "76296A45-3AC8-4190-8C48-47BA744D0543" : {
+    "objectMetadataList" : [
+      [
+        "76296A45-3AC8-4190-8C48-47BA744D0543",
+        "root",
+        "SM_Glass_Beaker"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "76296A45-3AC8-4190-8C48-47BA744D0543",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "76296A45-3AC8-4190-8C48-47BA744D0543",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "898424F1-30D9-4FC9-8107-397FE8859FB8" : {
+    "objectMetadataList" : [
+      [
+        "898424F1-30D9-4FC9-8107-397FE8859FB8",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "898424F1-30D9-4FC9-8107-397FE8859FB8",
+        "root",
+        "SM_Glass_Erlenmeyer"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "898424F1-30D9-4FC9-8107-397FE8859FB8",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "967DEDCC-47B2-40EC-803C-6D7C53898364" : {
+    "objectMetadataList" : [
+      [
+        "967DEDCC-47B2-40EC-803C-6D7C53898364",
+        "root",
+        "M_Glass"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "967DEDCC-47B2-40EC-803C-6D7C53898364",
+        "root",
+        "Cylinder_004"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "967DEDCC-47B2-40EC-803C-6D7C53898364",
+        "root",
+        "M_Tp_Plastic"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "967DEDCC-47B2-40EC-803C-6D7C53898364",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "967DEDCC-47B2-40EC-803C-6D7C53898364",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "967DEDCC-47B2-40EC-803C-6D7C53898364",
+        "root",
+        "M_PET"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "9BF8E0EE-36C7-46C0-B239-3A83103BF95E" : {
+    "objectMetadataList" : [
+      [
+        "9BF8E0EE-36C7-46C0-B239-3A83103BF95E",
+        "BaseMaterials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "9BF8E0EE-36C7-46C0-B239-3A83103BF95E",
+        "BaseMaterials",
+        "M_Glass"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "9BF8E0EE-36C7-46C0-B239-3A83103BF95E",
+        "BaseMaterials",
+        "M_Chrome"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "9BF8E0EE-36C7-46C0-B239-3A83103BF95E",
+        "Root",
+        "SM_Glass"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "9BF8E0EE-36C7-46C0-B239-3A83103BF95E",
+        "Preview"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "9BF8E0EE-36C7-46C0-B239-3A83103BF95E",
+        "BaseMaterials",
+        "M_Tp_Plastic"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "9BF8E0EE-36C7-46C0-B239-3A83103BF95E",
+        "Preview",
+        "SM_Glass"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "9BF8E0EE-36C7-46C0-B239-3A83103BF95E",
+        "BaseMaterials",
+        "M_Rubber"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "9BF8E0EE-36C7-46C0-B239-3A83103BF95E",
+        "BaseMaterials",
+        "M_PET"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "A18D8A09-5B1C-42BC-87F8-F9CE89053287" : {
+    "objectMetadataList" : [
+      [
+        "A18D8A09-5B1C-42BC-87F8-F9CE89053287",
+        "root",
+        "SM_Bottle_H2O2"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "A18D8A09-5B1C-42BC-87F8-F9CE89053287",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "A18D8A09-5B1C-42BC-87F8-F9CE89053287",
+        "root",
+        "SM_Bottle_H2O2",
+        "Cylinder_004"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "A18D8A09-5B1C-42BC-87F8-F9CE89053287",
+        "root",
+        "_materials",
+        "M_Label"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "A18D8A09-5B1C-42BC-87F8-F9CE89053287",
+        "root",
+        "SM_Bottle_H2O2",
+        "SM_Liquid_H2O2"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "A18D8A09-5B1C-42BC-87F8-F9CE89053287",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "A7C34837-BE85-46D0-9478-68BF087AC0EA" : {
+    "objectMetadataList" : [
+      [
+        "A7C34837-BE85-46D0-9478-68BF087AC0EA",
+        "root",
+        "SM_Bottle_Food_Coloring"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "A7C34837-BE85-46D0-9478-68BF087AC0EA",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "A7C34837-BE85-46D0-9478-68BF087AC0EA",
+        "root",
+        "SM_Bottle_Food_Coloring",
+        "Цилиндр_001"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "A7C34837-BE85-46D0-9478-68BF087AC0EA",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "AFFAADF7-5490-4985-8E48-7978B8F9A36F" : {
+    "objectMetadataList" : [
+      [
+        "AFFAADF7-5490-4985-8E48-7978B8F9A36F",
+        "BaseMaterials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "AFFAADF7-5490-4985-8E48-7978B8F9A36F",
+        "Preview"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "B8D7D979-8364-4241-AF7C-48E6FCC4FFDD" : {
+    "objectMetadataList" : [
+      [
+        "B8D7D979-8364-4241-AF7C-48E6FCC4FFDD",
+        "Preview"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "B8D7D979-8364-4241-AF7C-48E6FCC4FFDD",
+        "BaseMaterials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "BBB7C380-15FF-4EC2-B898-ACCB9632F424" : {
+    "objectMetadataList" : [
+      [
+        "BBB7C380-15FF-4EC2-B898-ACCB9632F424",
+        "BaseMaterials",
+        "M_Water"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "BBB7C380-15FF-4EC2-B898-ACCB9632F424",
+        "Preview"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "BBB7C380-15FF-4EC2-B898-ACCB9632F424",
+        "BaseMaterials",
+        "M_Label"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "BBB7C380-15FF-4EC2-B898-ACCB9632F424",
+        "BaseMaterials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "BBB7C380-15FF-4EC2-B898-ACCB9632F424",
+        "BaseMaterials",
+        "M_Tr_Plastic"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "BBB7C380-15FF-4EC2-B898-ACCB9632F424",
+        "BaseMaterials",
+        "M_Glass"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "CF1F79AB-E9FA-4B83-AF6B-CA4EC87832D3" : {
+    "objectMetadataList" : [
+      [
+        "CF1F79AB-E9FA-4B83-AF6B-CA4EC87832D3",
+        "root",
+        "SM_Glass_Florence"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "CF1F79AB-E9FA-4B83-AF6B-CA4EC87832D3",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "D7782980-A5E6-4A97-B981-5444245F7FE1" : {
+    "objectMetadataList" : [
+      [
+        "D7782980-A5E6-4A97-B981-5444245F7FE1",
+        "root",
+        "SM_Kettle"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "D7782980-A5E6-4A97-B981-5444245F7FE1",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "DA10A3A1-C598-467B-98E4-DB6BEAA2D84C" : {
+    "objectMetadataList" : [
+      [
+        "DA10A3A1-C598-467B-98E4-DB6BEAA2D84C",
+        "root",
+        "SM_Glass_Beaker",
+        "SM_Liquid_Beaker"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "DA10A3A1-C598-467B-98E4-DB6BEAA2D84C",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "DA10A3A1-C598-467B-98E4-DB6BEAA2D84C",
+        "root",
+        "SM_Glass_Beaker"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "DA10A3A1-C598-467B-98E4-DB6BEAA2D84C",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "E2CC7669-BD8F-4295-84F5-0CBF7B7948E1" : {
+    "objectMetadataList" : [
+      [
+        "E2CC7669-BD8F-4295-84F5-0CBF7B7948E1",
+        "root",
+        "SM_Bottle_H2O2"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "E2CC7669-BD8F-4295-84F5-0CBF7B7948E1",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "E2CC7669-BD8F-4295-84F5-0CBF7B7948E1",
+        "root",
+        "SM_Bottle_H2O2",
+        "Cylinder_004"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "E2CC7669-BD8F-4295-84F5-0CBF7B7948E1",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "E4E4E5F4-D29D-463E-BD00-187A0BAC1BD6" : {
+    "objectMetadataList" : [
+      [
+        "E4E4E5F4-D29D-463E-BD00-187A0BAC1BD6",
+        "root",
+        "Volcano_Snowy",
+        "Snow_Volcano"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "E4E4E5F4-D29D-463E-BD00-187A0BAC1BD6",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "E4E4E5F4-D29D-463E-BD00-187A0BAC1BD6",
+        "root",
+        "Volcano_Snowy"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "E4E4E5F4-D29D-463E-BD00-187A0BAC1BD6",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "E4E4E5F4-D29D-463E-BD00-187A0BAC1BD6",
+        "root",
+        "_materials",
+        "Snow_Volcano"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "F9204AF0-C05A-4C67-9A2E-10E4E59BE78F" : {
+    "objectMetadataList" : [
+      [
+        "F9204AF0-C05A-4C67-9A2E-10E4E59BE78F",
+        "root",
+        "SM_Glass_Beaker"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "F9204AF0-C05A-4C67-9A2E-10E4E59BE78F",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
+  "FADE22EE-74ED-4760-ABB8-3ADD04F4F7CA" : {
+    "objectMetadataList" : [
+      [
+        "FADE22EE-74ED-4760-ABB8-3ADD04F4F7CA",
+        "root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "FADE22EE-74ED-4760-ABB8-3ADD04F4F7CA",
+        "root",
+        "_materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "FADE22EE-74ED-4760-ABB8-3ADD04F4F7CA",
+        "root",
+        "_materials",
+        "M_Label"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "FADE22EE-74ED-4760-ABB8-3ADD04F4F7CA",
+        "root",
+        "SM_Bottle_Food_Coloring"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "FADE22EE-74ED-4760-ABB8-3ADD04F4F7CA",
+        "root",
+        "SM_Bottle_Food_Coloring",
+        "Цилиндр_001"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  }
+}

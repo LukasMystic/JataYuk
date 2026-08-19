@@ -58,14 +58,15 @@ extension ARCoordinator {
         let cameraPos = arView.cameraTransform.translation
         var ingredientCandidates: [(entity: Entity, comp: IngredientComponent, distance: Float)] = []
 
-        for anchor in [stationAAnchor, stationBAnchor].compactMap({ $0 }) {
-            for child in anchor.children {
-                if let comp = child.components[IngredientComponent.self] {
-                    let dist = simd_distance(cameraPos, child.position(relativeTo: nil))
-                    ingredientCandidates.append((child, comp, dist))
-                } else if let comp = child.components[MixingBeakerComponent.self] {
-                    updateBeakerProximity(entity: child, comp: comp, cameraPos: cameraPos)
-                }
+        for item in trackedIngredients {
+            if let comp = item.entity.components[IngredientComponent.self] {
+                let dist = simd_distance(cameraPos, item.entity.position(relativeTo: nil))
+                ingredientCandidates.append((item.entity, comp, dist))
+            }
+        }
+        for (_, entity) in beakerEntities {
+            if let comp = entity.components[MixingBeakerComponent.self] {
+                updateBeakerProximity(entity: entity, comp: comp, cameraPos: cameraPos)
             }
         }
 
@@ -96,7 +97,11 @@ extension ARCoordinator {
 
         let newState: ARProximityState
         if ingredient.proximityState == .inHand {
+            // Already carried — keep attached to camera.
             if cand.entity !== carriedEntity { attachEntityToCamera(cand.entity) }
+            newState = .inHand
+        } else if cand.distance < Self.inHandDistanceM {
+            // Entered grab distance — pick up.
             newState = .inHand
         } else if cand.entity === soloHighlight {
             newState = .highlighted
@@ -196,12 +201,10 @@ extension ARCoordinator {
     }
 
     func syncAllIngredientVisuals() {
-        for anchor in [stationAAnchor, stationBAnchor].compactMap({ $0 }) {
-            for child in anchor.children {
-                guard let comp = child.components[IngredientComponent.self] else { continue }
-                let ingredient = store.state.experiment[comp.side].ingredients[comp.ingredientIndex]
-                applyIngredientVisual(child, state: ingredient.proximityState, isGrayedOut: !ingredient.isInteractive)
-            }
+        for item in trackedIngredients {
+            guard let comp = item.entity.components[IngredientComponent.self] else { continue }
+            let ingredient = store.state.experiment[comp.side].ingredients[comp.ingredientIndex]
+            applyIngredientVisual(item.entity, state: ingredient.proximityState, isGrayedOut: !ingredient.isInteractive)
         }
     }
 
