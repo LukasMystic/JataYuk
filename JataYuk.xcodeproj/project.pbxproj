@@ -159,6 +159,9 @@
 			);
 			mainGroup = D1F5EBD33019F4100093CA76;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D169EFD230358320002C2249 /* XCLocalSwiftPackageReference "ShaderDev" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D1F5EBDD3019F4100093CA76 /* Products */;
 			projectDirPath = "";
@@ -261,7 +264,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9AU55MUUW9;
+				DEVELOPMENT_TEAM = 5MRHN4782T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = JataYuk/Info.plist;
@@ -297,7 +300,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9AU55MUUW9;
+				DEVELOPMENT_TEAM = 5MRHN4782T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = JataYuk/Info.plist;
@@ -478,6 +481,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		D169EFD230358320002C2249 /* XCLocalSwiftPackageReference "ShaderDev" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ShaderDev;
+		};
+/* End XCLocalSwiftPackageReference section */
 	};
 	rootObject = D1F5EBD43019F4100093CA76 /* Project object */;
 }
