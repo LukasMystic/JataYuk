@@ -40,8 +40,14 @@ extension ARCoordinator {
         if volcanoState != lastSeenVolcanoState {
             if volcanoState == .reacting {
                 startExplosionPipeline()
+                if let volcanoEntity {
+                    playSFX(.volcanoReacting, on: volcanoEntity)   // added
+                }
             } else {
                 syncExplosionVolcanoState(volcanoState)
+                if volcanoState == .done, let volcanoEntity {       // added
+                    playSFX(.volcanoOutcome, on: volcanoEntity)      // added
+                }
             }
             lastSeenVolcanoState = volcanoState
         }
@@ -107,6 +113,18 @@ extension ARCoordinator {
         applyIngredientVisual(cand.entity, state: newState, isGrayedOut: false)
 
         guard newState != ingredient.proximityState else { return }
+
+        // added — fires the instant yeast is picked up
+        if newState == .inHand, ingredient.type == .yeast {
+            playSFX(.scoopSand, on: cand.entity)
+        }
+        // added — fires when soap/food coloring is set down without having been poured
+        if newState == .far, ingredient.proximityState == .inHand,
+           (ingredient.type == .soap || ingredient.type == .foodColoring),
+           !ingredient.hasPouredThisPickup {
+            playSFX(.placeDishSoapOrFoodColoring, on: cand.entity)
+        }
+
         store.send(.ar(.ingredientProximityChanged(cand.comp.side, cand.comp.ingredientIndex, newState)))
     }
 
@@ -128,6 +146,11 @@ extension ARCoordinator {
         applyBeakerVisual(entity, proximity: newState, mixtureState: beakerState.mixtureState, isReadyToMix: isReadyToMix)
 
         guard newState != current else { return }
+
+        if newState == .far, current == .inHand {   // added — beaker set back down
+            playSFX(.placeGlass(comp.side), on: entity)
+        }
+
         store.send(.ar(.mixingBeakerProximityChanged(comp.side, newState)))
     }
 

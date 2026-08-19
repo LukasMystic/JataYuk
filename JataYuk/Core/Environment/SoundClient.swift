@@ -4,62 +4,14 @@
 //
 //  Created by Stanley Pratama Teguh on 29/07/26.
 //
-
 import Foundation
 import AVFoundation
 import UIKit
 
-
 @MainActor
 final class SoundClient: NSObject, AVAudioPlayerDelegate {
 
-    // ...existing properties unchanged, plus:
-    private var activeSFXPlayers: [AVAudioPlayer] = []
-
-    private let oneShotFiles: [SoundEffect: (filename: String, ext: String)] = [
-        .buttonPress: (filename: "ButtonPress", ext: "mp3"),
-    ]
-
-    override init() {
-        super.init()
-        configureAudioSession()
-        NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground),
-                                                 name: UIApplication.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground),
-                                                 name: UIApplication.willEnterForegroundNotification, object: nil)
-    }
-
-    // MARK: - One-shot SFX (non-spatial, overlappable)
-
-    func playButtonPress() async {
-        guard let file = oneShotFiles[.buttonPress] else { return }
-        guard let url = Bundle.main.url(forResource: file.filename, withExtension: file.ext) else {
-            print("SoundClient: missing SFX asset for buttonPress")
-            return
-        }
-        do {
-            let player = try AVAudioPlayer(contentsOf: url)
-            player.delegate = self
-            player.volume = masterVolume
-            player.numberOfLoops = 0
-            player.prepareToPlay()
-            player.play()
-            activeSFXPlayers.append(player)   // retained until it finishes, so it isn't deallocated mid-playback
-        } catch {
-            print("SoundClient: failed to play buttonPress SFX — \(error)")
-        }
-    }
-
-    // MARK: - AVAudioPlayerDelegate
-
-    nonisolated func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        Task { @MainActor [weak self] in
-            self?.activeSFXPlayers.removeAll { $0 === player }
-        }
-    }
-}
-@MainActor
-final class SoundClient {
+    // MARK: - BGM
 
     private struct TrackFile {
         let filename: String
@@ -83,7 +35,18 @@ final class SoundClient {
 
     private var activePlayer: AVAudioPlayer? { activeIsA ? playerA : playerB }
 
-    init() {
+    // MARK: - One-shot SFX (non-spatial, overlappable)
+
+    private var activeSFXPlayers: [AVAudioPlayer] = []
+
+    private let oneShotFiles: [SoundEffect: (filename: String, ext: String)] = [
+        .buttonPress: (filename: "ButtonPress", ext: "mp3"),
+    ]
+
+    // MARK: - Init
+
+    override init() {
+        super.init()
         configureAudioSession()
         NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground),
                                                  name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -112,6 +75,8 @@ final class SoundClient {
         guard !isPaused else { return }
         activePlayer?.play()
     }
+
+    // MARK: - BGM Public API
 
     func play(_ track: BGMTrack, fadeDuration: TimeInterval = 0.6) async {
         guard track != currentTrack else {
@@ -199,5 +164,34 @@ final class SoundClient {
             try? await Task.sleep(nanoseconds: stepNanos)
         }
         oldPlayer.stop()
+    }
+
+    // MARK: - One-shot SFX Public API
+
+    func playButtonPress() async {
+        guard let file = oneShotFiles[.buttonPress] else { return }
+        guard let url = Bundle.main.url(forResource: file.filename, withExtension: file.ext) else {
+            print("SoundClient: missing SFX asset for buttonPress")
+            return
+        }
+        do {
+            let player = try AVAudioPlayer(contentsOf: url)
+            player.delegate = self
+            player.volume = masterVolume
+            player.numberOfLoops = 0
+            player.prepareToPlay()
+            player.play()
+            activeSFXPlayers.append(player)   // retained until it finishes, so it isn't deallocated mid-playback
+        } catch {
+            print("SoundClient: failed to play buttonPress SFX — \(error)")
+        }
+    }
+
+    // MARK: - AVAudioPlayerDelegate
+
+    nonisolated func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        Task { @MainActor [weak self] in
+            self?.activeSFXPlayers.removeAll { $0 === player }
+        }
     }
 }
