@@ -19,6 +19,8 @@ func rootReducer(state: inout RootState, action: RootAction, environment: RootEn
     case .ar(let arAction):
         return arReducer(state: &state, action: arAction)
         
+    case .end(let endAction):
+            return endReducer(state: &state, action: endAction)
     case .onboarding(let OnboardingAction):
         return OnboardingReducer(
             state: &state,
@@ -202,6 +204,7 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
         if elapsed >= 30 {
             state.experiment.volcanoState = .done
             state.experiment.reactionState = .done
+            state.end.volcanoDoneAt = Date()
         }
 
     case .pauseSession:
@@ -216,6 +219,24 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
         state.ar.isPaused = false
         state.ar.sessionResetToken += 1
         state.experiment = .initial()
+        state.end = EndState()
+    }
+    return []
+}
+
+// MARK: - End Screen
+ 
+private func endReducer(state: inout RootState, action: EndAction) -> [Effect] {
+    switch action {
+    case .revealTick(let elapsed):
+        guard state.end.volcanoDoneAt != nil, !state.end.hasRevealedControls else { break }
+        if elapsed >= 15 {
+            state.end.isOverlayVisible = true
+            state.end.hasRevealedControls = true
+        }
+ 
+    case .toggleOverlay:
+        state.end.isOverlayVisible.toggle()
     }
     return []
 }
