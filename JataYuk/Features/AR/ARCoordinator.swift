@@ -29,6 +29,11 @@ final class ARCoordinator: NSObject {
     var stationAPosition: SIMD3<Float>?
     var stationBPosition: SIMD3<Float>?
 
+    // Local offsets within each plane anchor — needed when the anchor is at the
+    // plane center rather than the tap point (plane-locked placement).
+    var stationAEntityOffset: SIMD3<Float>?
+    var stationBEntityOffset: SIMD3<Float>?
+
     // Direct entity references for visual-only updates (avoids anchor.children traversal).
     var volcanoEntity: Entity?
     var beakerEntities: [StationSide: Entity] = [:]
@@ -42,6 +47,14 @@ final class ARCoordinator: NSObject {
     var carriedEntity: Entity?
     var carriedEntityOriginalParent: Entity?
     var carriedEntityOriginalLocalPos: SIMD3<Float> = .zero
+
+    // Pre-loaded asset templates — cloned at spawn time to avoid per-placement load stalls.
+    var assetTemplates: [ShaderDevAsset: Entity] = [:]
+
+    // Placement cursor — a flat disc that tracks the raycast hit point on detected planes
+    // so the user sees exactly where the next tap will land.
+    var placementCursor: ModelEntity?
+    var placementCursorAnchor: AnchorEntity?
 
     // Explosion ECS/TCA runtime (live after allPlaced, nil otherwise)
     var explosionStore: ExplosionStore?
@@ -63,6 +76,7 @@ final class ARCoordinator: NSObject {
         let cam = AnchorEntity(.camera)
         arView.scene.addAnchor(cam)
         cameraAnchor = cam
+        startPlacementCursorUpdates()
     }
 
     func stopMotionMonitoring() {
@@ -72,27 +86,21 @@ final class ARCoordinator: NSObject {
     }
 
     func resetSession() {
-        print("[Reset] resetSession called — arView:\(arView != nil)")
-        guard let arView else {
-            print("[Reset] aborting — arView is nil")
-            return
-        }
+        guard let arView else { return }
         tearDownExplosionSystem()
         detachCarriedEntity()
         stopMotionMonitoring()
 
         // Snapshot anchors first — removing while iterating live collection skips entries.
         let anchorsToRemove = Array(arView.scene.anchors).filter { $0 !== cameraAnchor }
-        print("[Reset] anchors before removal: \(arView.scene.anchors.count), removing \(anchorsToRemove.count)")
-        for a in anchorsToRemove {
-            print("[Reset]  → \(type(of: a)) id:\(a.id) name:'\(a.name)'")
-        }
         anchorsToRemove.forEach { arView.scene.removeAnchor($0) }
-        print("[Reset] anchors after removal: \(arView.scene.anchors.count)")
         volcanoAnchor = nil; stationAAnchor = nil; stationBAnchor = nil
         volcanoPosition = nil; stationAPosition = nil; stationBPosition = nil
+        stationAEntityOffset = nil; stationBEntityOffset = nil
         volcanoEntity = nil; beakerEntities.removeAll()
         planeEntities.removeAll()
+        assetTemplates.removeAll()
+        placementCursor = nil; placementCursorAnchor = nil
         isPlacing = false
 
         lastSeenResetToken = store.state.ar.sessionResetToken
@@ -102,6 +110,8 @@ final class ARCoordinator: NSObject {
         let config = ARWorldTrackingConfiguration()
         config.planeDetection = [.horizontal]
         arView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
+
+        startPlacementCursorUpdates()
     }
 
     // MARK: - Carry System

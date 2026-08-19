@@ -12,7 +12,7 @@ import Combine
 extension ARCoordinator {
 
     static let inHandDistanceM: Float      = 0.15
-    static let highlightedDistanceM: Float = 0.35
+    static let highlightedDistanceM: Float = 0.20
 
     func subscribeToProximityUpdates() {
         guard let arView else { return }
@@ -125,7 +125,12 @@ extension ARCoordinator {
         }
 
         let isReadyToMix = beakerState.mixtureState == .prepared && allIngredientsPoured(side: comp.side)
-        applyBeakerVisual(entity, proximity: newState, mixtureState: beakerState.mixtureState, isReadyToMix: isReadyToMix)
+        // Highlight this beaker whenever the user is holding an ingredient from the same side —
+        // acts as a pour-target indicator even before they're physically close to it.
+        let isHoldingIngredientForSide = store.state.experiment[comp.side].ingredients
+            .contains { $0.proximityState == .inHand }
+        applyBeakerVisual(entity, proximity: newState, mixtureState: beakerState.mixtureState,
+                          isReadyToMix: isReadyToMix, isTargetBeaker: isHoldingIngredientForSide)
 
         guard newState != current else { return }
         store.send(.ar(.mixingBeakerProximityChanged(comp.side, newState)))
@@ -150,7 +155,14 @@ extension ARCoordinator {
         }
     }
 
-    func applyBeakerVisual(_ entity: Entity, proximity: ARProximityState, mixtureState: MixtureState, isReadyToMix: Bool) {
+    func applyBeakerVisual(_ entity: Entity, proximity: ARProximityState, mixtureState: MixtureState,
+                           isReadyToMix: Bool, isTargetBeaker: Bool = false) {
+        // When the user is carrying an ingredient for this side, pulse the beaker as a pour target.
+        if isTargetBeaker && mixtureState != .mixed {
+            entity.components.remove(OpacityComponent.self)
+            entity.scale = SIMD3(repeating: 1.1)
+            return
+        }
         switch mixtureState {
         case .mixed:
             entity.components.remove(OpacityComponent.self)

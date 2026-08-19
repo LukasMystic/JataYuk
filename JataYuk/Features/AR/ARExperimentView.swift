@@ -195,7 +195,7 @@ struct ARExperimentView: View {
             } else {
                 // Default — always show Hold, disabled (grey) when nothing is highlighted.
                 let highlighted = highlightedIngredient
-                Button("Hold") {
+                Button("Press") {
                     if let (side, index) = highlighted {
                         store.send(.ar(.pickupIngredient(side, index)))
                     }

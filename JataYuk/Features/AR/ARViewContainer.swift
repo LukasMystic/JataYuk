@@ -21,6 +21,11 @@ struct ARViewContainer: UIViewRepresentable {
 
     func makeUIView(context: Context) -> ARView {
         let arView = ARView(frame: .zero, cameraMode: .ar, automaticallyConfigureSession: false)
+        // Grounding shadow rendering uses vsGeometryModifier + fsSurfaceMeshShadowCasterProgrammableBlending.
+        // Those shaders require paramDrawIndices buffer at index 28 which RealityKit fails to bind
+        // when materials declare outputs:realitykit:vertex without a fallback function constant.
+        // Disabling grounding shadows keeps the crash out of the render path entirely.
+        arView.renderOptions.insert(.disableGroundingShadows)
 
         let config = ARWorldTrackingConfiguration()
         config.planeDetection = [.horizontal]

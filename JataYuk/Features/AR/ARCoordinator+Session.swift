@@ -37,24 +37,26 @@ extension ARCoordinator: ARSessionDelegate {
         Task { @MainActor [weak self] in
             guard let self, let arView else { return }
             let config = ARWorldTrackingConfiguration()
-            config.planeDetection = store.state.ar.placement != .allPlaced ? [.horizontal] : []
+            config.planeDetection = store.state.ar.placement == .allPlaced ? [] : [.horizontal]
             arView.session.run(config)
+            // Re-subscribe to proximity if we were in the experiment (pausing doesn't lose this,
+            // but a true system interruption like a phone call kills the session and needs it back).
+            if store.state.ar.placement == .allPlaced, !store.state.ar.isPaused {
+                subscribeToProximityUpdates()
+            }
         }
     }
 
     // MARK: - Pause / Resume
 
     func pauseARSession() {
-        arView?.session.pause()
-        stopMotionMonitoring()          // stops tilt + shake CoreMotion loops
-        cancellables.removeAll()        // stops proximity SceneEvents.Update subscription
+        // Keep the ARKit session running so resume is instant — only stop monitoring work.
+        // SceneEvents.Update (foam tick + proximity) is in cancellables and stops here.
+        stopMotionMonitoring()
     }
 
     func resumeARSession() {
-        guard let arView else { return }
-        let config = ARWorldTrackingConfiguration()
-        config.planeDetection = []      // already placed — no plane detection needed
-        arView.session.run(config)      // no reset options — preserves world map and anchor positions
+        // Session never paused, so no session.run() needed — just restart monitoring.
         startTiltMonitoring()
         startShakeMonitoring()
         subscribeToProximityUpdates()

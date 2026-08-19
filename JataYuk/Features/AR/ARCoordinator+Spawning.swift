@@ -15,23 +15,15 @@ extension ARCoordinator {
     func preloadAssets() {
         Task {
             let allAssets: [ShaderDevAsset] = [
-                .snowyVolcano, .beaker,
+                .snowyVolcano, .beaker, .tray,
                 .dishsoap, .foodColoring, .h2o2, .kettle, .spoon
             ]
-            await withTaskGroup(of: (ShaderDevAsset, Entity?).self) { group in
-                for asset in allAssets {
-                    group.addTask { [weak self] in
-                        guard let self else { return (asset, nil) }
-                        do {
-                            let entity = try await ShaderDevAssets.load(asset)
-                            return (asset, entity)
-                        } catch {
-                            return (asset, nil)
-                        }
-                    }
-                }
-                for await (asset, entity) in group {
-                    if let entity { assetTemplates[asset] = entity }
+            for asset in allAssets {
+                do {
+                    let entity = try await ShaderDevAssets.load(asset)
+                    assetTemplates[asset] = entity
+                } catch {
+                    // Skip silently — cloneOrLoad will fall back to a fresh load at spawn time.
                 }
             }
         }
@@ -39,53 +31,40 @@ extension ARCoordinator {
 
     func spawnInteractiveEntities() async {
         if let anchorA = stationAAnchor {
-            await spawnIngredients(store.state.experiment.stationA.ingredients, on: anchorA, side: .sideA)
+            let offsetA = stationAEntityOffset ?? .zero
+            await spawnIngredients(store.state.experiment.stationA.ingredients, on: anchorA, side: .sideA, offset: offsetA)
             if beakerEntities[.sideA] == nil {
-                await spawnMixingBeaker(on: anchorA, side: .sideA)
+                await spawnMixingBeaker(on: anchorA, side: .sideA, offset: offsetA)
             }
         }
         if let anchorB = stationBAnchor {
-            await spawnIngredients(store.state.experiment.stationB.ingredients, on: anchorB, side: .sideB)
+            let offsetB = stationBEntityOffset ?? .zero
+            await spawnIngredients(store.state.experiment.stationB.ingredients, on: anchorB, side: .sideB, offset: offsetB)
             if beakerEntities[.sideB] == nil {
-                await spawnMixingBeaker(on: anchorB, side: .sideB)
+                await spawnMixingBeaker(on: anchorB, side: .sideB, offset: offsetB)
             }
         }
     }
 
-    func spawnIngredients(_ ingredients: [Ingredient], on anchor: AnchorEntity, side: StationSide) async {
+    func spawnIngredients(_ ingredients: [Ingredient], on anchor: AnchorEntity, side: StationSide, offset: SIMD3<Float> = .zero) async {
         let spacing: Float = 0.18
         let startX = -Float(ingredients.count - 1) * spacing / 2
 
-        // Load all ingredient models in parallel.
-        let pairs: [(index: Int, entity: Entity)] = await withTaskGroup(
-            of: (Int, Entity).self
-        ) { group in
-            for (i, ingredient) in ingredients.enumerated() {
-                group.addTask { [weak self] in
-                    guard let self else { return (i, Entity()) }
-                    let entity = await self.loadIngredientEntity(ingredient.type)
-                    return (i, entity)
-                }
-            }
-            var results: [(Int, Entity)] = []
-            for await pair in group { results.append(pair) }
-            return results.map { (index: $0.0, entity: $0.1) }
-        }
-
-        for pair in pairs.sorted(by: { $0.index < $1.index }) {
-            pair.entity.position = SIMD3(startX + Float(pair.index) * spacing, 0, 0)
-            pair.entity.components.set(IngredientComponent(side: side, ingredientIndex: pair.index))
-            anchor.addChild(pair.entity)
+        for (i, ingredient) in ingredients.enumerated() {
+            let entity = await loadIngredientEntity(ingredient.type)
+            entity.position = offset + SIMD3(startX + Float(i) * spacing, 0, 0)
+            entity.components.set(IngredientComponent(side: side, ingredientIndex: i))
+            anchor.addChild(entity)
         }
     }
 
-    func spawnMixingBeaker(on anchor: AnchorEntity, side: StationSide) async {
+    func spawnMixingBeaker(on anchor: AnchorEntity, side: StationSide, offset: SIMD3<Float> = .zero) async {
         let entity = await loadAsset(
             .beaker,
             fallbackColor: UIColor.systemGray.withAlphaComponent(0.5),
             fallbackSize: [0.064, 0.07, 0.064]
         )
-        entity.position = SIMD3(0, 0, -0.25)
+        entity.position = offset + SIMD3(0, 0, -0.25)
         entity.components.set(MixingBeakerComponent(side: side))
         anchor.addChild(entity)
         beakerEntities[side] = entity
