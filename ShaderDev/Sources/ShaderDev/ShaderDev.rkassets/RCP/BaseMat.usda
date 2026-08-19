@@ -12,7 +12,7 @@ reorder rootPrims = ["Preview", "BaseMaterials"]
 
 def Xform "Preview"
 {
-    reorder nameChildren = ["SM_Glass", "SM_Tp_Plastic", "SM_Rubber", "SM_Water", "SM_Tr_Plastic", "SM_Label_Plastic", "SM_PET_Plastic", "SM_Chrome"]
+    reorder nameChildren = ["SM_Glass", "SM_Tp_Plastic", "SM_Rubber", "SM_Water", "SM_Tr_Plastic", "SM_Label_Plastic", "SM_Yeast", "SM_PET_Plastic", "SM_Chrome"]
     def Capsule "SM_Glass" (
         active = true
         prepend apiSchemas = ["MaterialBindingAPI"]
@@ -158,13 +158,32 @@ def Xform "Preview"
         float3 xformOp:translate = (0.4, 0, 0.8)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
     }
+
+    def Capsule "SM_Yeast" (
+        active = true
+        prepend apiSchemas = ["MaterialBindingAPI"]
+    )
+    {
+        uniform token axis = "Y"
+        double height = 0.2
+        rel material:binding = </BaseMaterials/M_Yeast> (
+            bindMaterialAs = "weakerThanDescendants"
+        )
+        double radius = 0.1
+        float2 ui:nodegraph:node:pos = (20, 20)
+        int ui:nodegraph:node:stackingOrder = 1
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (-0.4, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
 }
 
 def Xform "BaseMaterials" (
     active = true
 )
 {
-    reorder nameChildren = ["M_Glass", "M_Tp_Plastic", "M_Rubber", "M_Water", "M_Tr_Plastic", "M_Label", "M_PET", "M_Chrome"]
+    reorder nameChildren = ["M_Glass", "M_Tp_Plastic", "M_Rubber", "M_Water", "M_Tr_Plastic", "M_Label", "M_Yeast", "M_PET", "M_Chrome"]
     quatf xformOp:orient = (1, 0, 0, 0)
     float3 xformOp:scale = (1, 1, 1)
     float3 xformOp:translate = (0, 0, 0)
@@ -172,7 +191,9 @@ def Xform "BaseMaterials" (
 
     def Material "M_Glass"
     {
-        token outputs:mtlx:surface.connect = </BaseMaterials/M_Glass/PBRSurface.outputs:out>        float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (335.25, 100.5)
+        token outputs:mtlx:surface.connect = </BaseMaterials/M_Glass/PBRSurface.outputs:out>
+        token outputs:realitykit:vertex
+        float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (335.25, 100.5)
 
         def Shader "PBRSurface"
         {
@@ -329,7 +350,9 @@ def Xform "BaseMaterials" (
 
     def Material "M_Tp_Plastic"
     {
-        token outputs:mtlx:surface.connect = </BaseMaterials/M_Tp_Plastic/PBRSurface.outputs:out>        float2 ui:nodegraph:node:pos = (215.75, 104.5)
+        token outputs:mtlx:surface.connect = </BaseMaterials/M_Tp_Plastic/PBRSurface.outputs:out>
+        token outputs:realitykit:vertex
+        float2 ui:nodegraph:node:pos = (215.75, 104.5)
         int ui:nodegraph:node:stackingOrder = 1
         float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (335.25, 100.5)
         int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 282
@@ -473,7 +496,9 @@ def Xform "BaseMaterials" (
 
     def Material "M_PET"
     {
-        token outputs:mtlx:surface.connect = </BaseMaterials/M_PET/PBRSurface.outputs:out>        float2 ui:nodegraph:node:pos = (235.75, 124.5)
+        token outputs:mtlx:surface.connect = </BaseMaterials/M_PET/PBRSurface.outputs:out>
+        token outputs:realitykit:vertex
+        float2 ui:nodegraph:node:pos = (235.75, 124.5)
         int ui:nodegraph:node:stackingOrder = 2
         float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (335.25, 100.5)
         int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 13
@@ -498,7 +523,9 @@ def Xform "BaseMaterials" (
 
     def Material "M_Chrome"
     {
-        token outputs:mtlx:surface.connect = </BaseMaterials/M_Chrome/PBRSurface.outputs:out>        float2 ui:nodegraph:node:pos = (255.75, 144.5)
+        token outputs:mtlx:surface.connect = </BaseMaterials/M_Chrome/PBRSurface.outputs:out>
+        token outputs:realitykit:vertex
+        float2 ui:nodegraph:node:pos = (255.75, 144.5)
         int ui:nodegraph:node:stackingOrder = 3
         float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (335.25, 100.5)
         int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 18
@@ -524,7 +551,9 @@ def Xform "BaseMaterials" (
 
     def Material "M_Rubber"
     {
-        token outputs:mtlx:surface.connect = </BaseMaterials/M_Rubber/PBRSurface.outputs:out>        float2 ui:nodegraph:node:pos = (275.75, 164.5)
+        token outputs:mtlx:surface.connect = </BaseMaterials/M_Rubber/PBRSurface.outputs:out>
+        token outputs:realitykit:vertex
+        float2 ui:nodegraph:node:pos = (275.75, 164.5)
         int ui:nodegraph:node:stackingOrder = 4
         float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (331.41016, 101.85547)
         int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 7
@@ -550,7 +579,9 @@ def Xform "BaseMaterials" (
 
     def Material "M_Water"
     {
-        token outputs:mtlx:surface.connect = </BaseMaterials/M_Water/PBRSurface.outputs:out>        float2 ui:nodegraph:node:pos = (275.75, 164.5)
+        token outputs:mtlx:surface.connect = </BaseMaterials/M_Water/PBRSurface.outputs:out>
+        token outputs:realitykit:vertex
+        float2 ui:nodegraph:node:pos = (275.75, 164.5)
         int ui:nodegraph:node:stackingOrder = 4
         float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (335.25, 100.5)
         int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 18
@@ -578,7 +609,9 @@ def Xform "BaseMaterials" (
 
     def Material "M_Tr_Plastic"
     {
-        token outputs:mtlx:surface.connect = </BaseMaterials/M_Tr_Plastic/PBRSurface.outputs:out>        float2 ui:nodegraph:node:pos = (235.75, 124.5)
+        token outputs:mtlx:surface.connect = </BaseMaterials/M_Tr_Plastic/PBRSurface.outputs:out>
+        token outputs:realitykit:vertex
+        float2 ui:nodegraph:node:pos = (235.75, 124.5)
         int ui:nodegraph:node:stackingOrder = 2
         float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (335.25, 100.5)
         int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 282
@@ -722,7 +755,9 @@ def Xform "BaseMaterials" (
 
     def Material "M_Label"
     {
-        token outputs:mtlx:surface.connect = </BaseMaterials/M_Label/PBRSurface.outputs:out>        float2 ui:nodegraph:node:pos = (255.75, 144.5)
+        token outputs:mtlx:surface.connect = </BaseMaterials/M_Label/PBRSurface.outputs:out>
+        token outputs:realitykit:vertex
+        float2 ui:nodegraph:node:pos = (255.75, 144.5)
         int ui:nodegraph:node:stackingOrder = 3
         float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (335.25, 100.5)
         int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 13
@@ -743,6 +778,67 @@ def Xform "BaseMaterials" (
             token outputs:out
             float2 ui:nodegraph:node:pos = (78.97656, 83.28125)
             int ui:nodegraph:node:stackingOrder = 23
+        }
+    }
+
+    def Material "M_Yeast"
+    {
+        token outputs:mtlx:surface.connect = </BaseMaterials/M_Yeast/PBRSurface.outputs:out>
+        token outputs:realitykit:vertex
+        float2 ui:nodegraph:node:pos = (255.75, 144.5)
+        int ui:nodegraph:node:stackingOrder = 3
+        float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (335.25, 100.5)
+        int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 13
+
+        def Shader "PBRSurface"
+        {
+            uniform token info:id = "ND_realitykit_pbr_surfaceshader"
+            float inputs:ambientOcclusion
+            color3f inputs:baseColor = (0.8862745, 0.7607843, 0.5647059) (
+                colorSpace = "srgb_displayp3"
+            )
+            float inputs:clearcoat = 0.57
+            float3 inputs:clearcoatNormal
+            float inputs:clearcoatRoughness = 0.22
+            color3f inputs:emissiveColor
+            bool inputs:hasPremultipliedAlpha
+            float inputs:metallic
+            float3 inputs:normal.connect = None
+            float inputs:opacity
+            float inputs:opacityThreshold
+            float inputs:roughness = 0.87
+            float inputs:specular = 0
+            token outputs:out
+            float2 ui:nodegraph:node:pos = (78.97656, 83.28125)
+            int ui:nodegraph:node:stackingOrder = 16
+        }
+
+        def Shader "Noise3D"
+        {
+            uniform token info:id = "ND_noise3d_vector3"
+            float3 inputs:amplitude.connect = </BaseMaterials/M_Yeast/Multiply.outputs:out>
+            float inputs:pivot
+            float3 inputs:position
+            float3 outputs:out
+            float2 ui:nodegraph:node:pos = (-488.89844, -79.13281)
+            int ui:nodegraph:node:stackingOrder = 27
+        }
+
+        def Shader "Position"
+        {
+            uniform token info:id = "ND_position_vector3"
+            float3 outputs:out
+            float2 ui:nodegraph:node:pos = (-858.60547, -103.26953)
+            int ui:nodegraph:node:stackingOrder = 28
+        }
+
+        def Shader "Multiply"
+        {
+            uniform token info:id = "ND_multiply_vector3"
+            float3 inputs:in1.connect = </BaseMaterials/M_Yeast/Position.outputs:out>
+            float3 outputs:out
+            float2 ui:nodegraph:node:pos = (-674.15625, -42.683594)
+            int ui:nodegraph:node:stackingOrder = 22
         }
     }
 }
