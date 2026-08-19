@@ -18,6 +18,7 @@ struct RootState: Equatable {
     var ar: ARState = ARState()
     var experiment: ExperimentState = .initial()
     var end: EndState = EndState()
+    var onboarding = OnboardingState() //added
     var hasSeenInstructions: Bool = false
     var isInstructionVisible: Bool = false
     var isItemInfoVisible: Bool = false

@@ -7,7 +7,6 @@
 
 import ARKit
 import RealityKit
-import UIKit
 import Combine
 
 extension ARCoordinator {
@@ -91,9 +90,7 @@ extension ARCoordinator {
         let ingredient = store.state.experiment[cand.comp.side].ingredients[cand.comp.ingredientIndex]
 
         guard ingredient.isInteractive else {
-            if let model = cand.entity as? ModelEntity {
-                applyIngredientVisual(model, state: .far, type: ingredient.type, isGrayedOut: true)
-            }
+            applyIngredientVisual(cand.entity, state: .far, isGrayedOut: true)
             return
         }
 
@@ -107,9 +104,7 @@ extension ARCoordinator {
             newState = .far
         }
 
-        if let model = cand.entity as? ModelEntity {
-            applyIngredientVisual(model, state: newState, type: ingredient.type, isGrayedOut: false)
-        }
+        applyIngredientVisual(cand.entity, state: newState, isGrayedOut: false)
 
         guard newState != ingredient.proximityState else { return }
         store.send(.ar(.ingredientProximityChanged(cand.comp.side, cand.comp.ingredientIndex, newState)))
@@ -129,10 +124,8 @@ extension ARCoordinator {
             newState = .far
         }
 
-        if let model = entity as? ModelEntity {
-            let isReadyToMix = beakerState.mixtureState == .prepared && allIngredientsPoured(side: comp.side)
-            applyBeakerVisual(model, proximity: newState, mixtureState: beakerState.mixtureState, isReadyToMix: isReadyToMix)
-        }
+        let isReadyToMix = beakerState.mixtureState == .prepared && allIngredientsPoured(side: comp.side)
+        applyBeakerVisual(entity, proximity: newState, mixtureState: beakerState.mixtureState, isReadyToMix: isReadyToMix)
 
         guard newState != current else { return }
         store.send(.ar(.mixingBeakerProximityChanged(comp.side, newState)))
@@ -140,53 +133,40 @@ extension ARCoordinator {
 
     // MARK: - Visual helpers
 
-    func applyIngredientVisual(_ entity: ModelEntity, state: ARProximityState, type: BeakerType, isGrayedOut: Bool) {
+    func applyIngredientVisual(_ entity: Entity, state: ARProximityState, isGrayedOut: Bool) {
         if isGrayedOut {
-            entity.model?.materials = [SimpleMaterial(color: UIColor.systemGray.withAlphaComponent(0.4), isMetallic: false)]
+            entity.components.set(OpacityComponent(opacity: 0.35))
             entity.scale = .one
             return
         }
-        let base = ingredientColor(type)
+        entity.components.remove(OpacityComponent.self)
         switch state {
         case .far:
-            entity.model?.materials = [SimpleMaterial(color: base, isMetallic: false)]
             entity.scale = .one
         case .highlighted:
-            entity.model?.materials = [SimpleMaterial(color: lightened(base), isMetallic: false)]
             entity.scale = SIMD3(repeating: 1.18)
         case .inHand:
-            entity.model?.materials = [UnlitMaterial(color: base)]
             entity.scale = .one
         }
     }
 
-    func applyBeakerVisual(_ model: ModelEntity, proximity: ARProximityState, mixtureState: MixtureState, isReadyToMix: Bool) {
+    func applyBeakerVisual(_ entity: Entity, proximity: ARProximityState, mixtureState: MixtureState, isReadyToMix: Bool) {
         switch mixtureState {
         case .mixed:
-            model.model?.materials = [SimpleMaterial(color: UIColor.systemGreen.withAlphaComponent(0.85), isMetallic: false)]
-            model.scale = .one
+            entity.components.remove(OpacityComponent.self)
+            entity.scale = .one
         case .idle:
-            model.model?.materials = [SimpleMaterial(color: UIColor.systemGray.withAlphaComponent(0.5), isMetallic: false)]
-            model.scale = .one
+            entity.components.set(OpacityComponent(opacity: 0.85))
+            entity.scale = .one
         case .prepared:
+            entity.components.remove(OpacityComponent.self)
             switch proximity {
             case .far:
-                let color: UIColor = isReadyToMix
-                    ? UIColor.systemGreen.withAlphaComponent(0.45)
-                    : UIColor.white.withAlphaComponent(0.6)
-                model.model?.materials = [SimpleMaterial(color: color, isMetallic: false)]
-                model.scale = .one
+                entity.scale = .one
             case .highlighted:
-                if isReadyToMix {
-                    model.model?.materials = [UnlitMaterial(color: .systemGreen)]
-                    model.scale = SIMD3(repeating: 1.18)
-                } else {
-                    model.model?.materials = [SimpleMaterial(color: UIColor.white.withAlphaComponent(0.9), isMetallic: false)]
-                    model.scale = SIMD3(repeating: 1.1)
-                }
+                entity.scale = SIMD3(repeating: isReadyToMix ? 1.18 : 1.1)
             case .inHand:
-                model.model?.materials = [UnlitMaterial(color: isReadyToMix ? .systemGreen : .white)]
-                model.scale = .one
+                entity.scale = .one
             }
         }
     }
@@ -195,13 +175,10 @@ extension ARCoordinator {
         guard let entity = volcanoEntity else { return }
         switch store.state.experiment.volcanoState {
         case .locked:
-            entity.model?.materials = [SimpleMaterial(color: UIColor.systemGray.withAlphaComponent(0.4), isMetallic: false)]
             entity.scale = .one
         case .highlighted:
-            entity.model?.materials = [UnlitMaterial(color: .systemOrange)]
             entity.scale = SIMD3(repeating: 1.06)
         case .reacting, .done:
-            entity.model?.materials = [SimpleMaterial(color: UIColor.systemOrange.withAlphaComponent(0.9), isMetallic: false)]
             entity.scale = .one
         }
     }
@@ -209,10 +186,9 @@ extension ARCoordinator {
     func syncAllIngredientVisuals() {
         for anchor in [stationAAnchor, stationBAnchor].compactMap({ $0 }) {
             for child in anchor.children {
-                guard let comp = child.components[IngredientComponent.self],
-                      let model = child as? ModelEntity else { continue }
+                guard let comp = child.components[IngredientComponent.self] else { continue }
                 let ingredient = store.state.experiment[comp.side].ingredients[comp.ingredientIndex]
-                applyIngredientVisual(model, state: ingredient.proximityState, type: ingredient.type, isGrayedOut: !ingredient.isInteractive)
+                applyIngredientVisual(child, state: ingredient.proximityState, isGrayedOut: !ingredient.isInteractive)
             }
         }
     }
@@ -224,12 +200,5 @@ extension ARCoordinator {
             if store.state.experiment[side].mixingBeaker.proximityState == .inHand { return true }
         }
         return false
-    }
-
-    // Blends a color 40% toward white for highlighted entities.
-    func lightened(_ color: UIColor) -> UIColor {
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        color.getRed(&r, green: &g, blue: &b, alpha: &a)
-        return UIColor(red: r * 0.6 + 0.4, green: g * 0.6 + 0.4, blue: b * 0.6 + 0.4, alpha: a)
     }
 }

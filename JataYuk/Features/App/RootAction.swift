@@ -12,6 +12,7 @@ enum RootAction {
     case overlay(OverlayAction)
     case ar(ARAction)
     case end(EndAction)
+    case onboarding(OnboardingAction) //added
 }
 
 // MARK: - Overlay Actions

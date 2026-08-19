@@ -28,18 +28,19 @@ struct OnboardingPage: Equatable {
     let isLast: Bool
 }
 
-struct InstructionStep: Equatable {
+struct InstructionStep: Equatable, Identifiable {
+    var id: InstructionStepKey { key }
+    let key: InstructionStepKey
     let stepNumber: Int
-    let title: String
-    let description: String
-    let animationName: String
     let context: InstructionContext
+    let title: String        // kept for ERD parity; DuAR copy doesn't currently use titles
+    let description: String  // exact wording from Instructions Copy
+    let animation: String?   // asset name placeholder; nil until Figma/animation spec exists - what for ya?
 }
 
 struct ItemInfo: Equatable {
-    let beakerType: BeakerType
-    let title: String
-    let description: String
-    let scienceFact: String
-    let imageName: String
+    var beakerType: BeakerType
+    var title: String
+    var description: String
+    var sections: [ItemInfoSection] //sciencefact is divided into sections
 }

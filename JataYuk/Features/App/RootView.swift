@@ -19,7 +19,7 @@ struct RootView: View {
             }
 
             if store.state.isItemInfoVisible, let item = store.state.activeInfoItem {
-                ItemInfoOverlayPlaceholder(store: store, item: item)
+                ItemInfoView(store: store, item: item)
             }
         }
     }
@@ -52,16 +52,16 @@ private struct InstructionOverlayPlaceholder: View {
     }
 }
 
-private struct ItemInfoOverlayPlaceholder: View {
-    @ObservedObject var store: Store<RootState, RootAction>
-    let item: BeakerType
-
-    var body: some View {
-        Color.black.opacity(0.6).ignoresSafeArea()
-        VStack(spacing: 16) {
-            Text("Info: \(String(describing: item))").font(.title).foregroundColor(.white)
-            Button("Close") { store.send(.overlay(.hideItemInfo)) }
-                .foregroundColor(.white)
-        }
-    }
-}
+//private struct ItemInfoOverlayPlaceholder: View {
+//    @ObservedObject var store: Store<RootState, RootAction>
+//    let item: BeakerType
+//
+//    var body: some View {
+//        Color.black.opacity(0.6).ignoresSafeArea()
+//        VStack(spacing: 16) {
+//            Text("Info: \(String(describing: item))").font(.title).foregroundColor(.white)
+//            Button("Close") { store.send(.overlay(.hideItemInfo)) }
+//                .foregroundColor(.white)
+//        }
+//    }
+//} button udah ada di ARExperimentView file with inHandInfoButton

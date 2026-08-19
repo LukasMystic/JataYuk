@@ -62,6 +62,7 @@ struct Ingredient: Equatable {
     let type: BeakerType
     var h2o2Variant: H2O2Variant? = nil
     var pourCount: Int = 0
+    var hasPouredThisPickup: Bool = false //added
     var amountPerPour: Double
     var proximityState: ARProximityState = .far
     var grayOutReason: GrayOutReason? = nil
@@ -132,6 +133,8 @@ struct ExperimentState: Equatable {
     var reactionState: ReactionState = .idle
     var reactionStartedAt: Date? = nil
     var foam: FoamModel = FoamModel()
+    var hasSeenSideAIntro: Bool = false //added
+    var hasSeenSideBIntro: Bool = false //added
 }
 
 extension ExperimentState {
