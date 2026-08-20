@@ -7,6 +7,7 @@
 //
 
 import RealityKit
+import UIKit
 
 extension ARCoordinator {
 
@@ -58,6 +59,12 @@ extension ARCoordinator {
 
         if let volcanoEntity {
             volcanoEntity.components[VolcanoComponent.self] = VolcanoComponent(state: .reacting)
+        }
+
+        // Tint foam with the selected food coloring color (R/G/B).
+        let foodColors: [UIColor] = [.systemRed, .systemGreen, .systemBlue]
+        if let idx = store.state.experiment.foam.foodColorIndex, idx < foodColors.count {
+            sphSystem?.setFoamColor(foodColors[idx])
         }
 
         explosionStore.send(.pipelineStarted(store.state.experiment.foam))

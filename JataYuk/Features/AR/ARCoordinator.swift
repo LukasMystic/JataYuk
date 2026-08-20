@@ -21,15 +21,16 @@ final class ARCoordinator: NSObject {
     // Plane visualizations keyed by ARPlaneAnchor identifier
     var planeEntities: [UUID: AnchorEntity] = [:]
 
-    // Placed scene anchors
+    // Root anchor for the whole scene; station entities are children of this.
     var volcanoAnchor: AnchorEntity?
-    var stationAAnchor: AnchorEntity?
-    var stationBAnchor: AnchorEntity?
+    var stationAAnchor: Entity?
+    var stationBAnchor: Entity?
 
-    // World positions captured at placement time — used for overlap detection.
+    // World position of the tapped point — used for overlap detection.
     var volcanoPosition: SIMD3<Float>?
-    var stationAPosition: SIMD3<Float>?
-    var stationBPosition: SIMD3<Float>?
+
+    // Cache of pre-loaded asset templates — cloned on spawn to avoid re-loading.
+    var assetTemplates: [ShaderDevAsset: Entity] = [:]
 
     // Direct entity references for visual-only updates (avoids anchor.children traversal).
     var volcanoEntity: Entity?
@@ -92,8 +93,8 @@ final class ARCoordinator: NSObject {
         anchorsToRemove.forEach { arView.scene.removeAnchor($0) }
         print("[Reset] anchors after removal: \(arView.scene.anchors.count)")
         volcanoAnchor = nil; stationAAnchor = nil; stationBAnchor = nil
-        volcanoPosition = nil; stationAPosition = nil; stationBPosition = nil
-        volcanoEntity = nil; beakerEntities.removeAll()
+        volcanoPosition = nil
+        volcanoEntity = nil; beakerEntities.removeAll(); assetTemplates.removeAll()
         planeEntities.removeAll()
         isPlacing = false
 

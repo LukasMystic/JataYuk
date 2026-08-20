@@ -27,28 +27,28 @@ struct ARExperimentView: View {
                 isPaused: store.state.ar.isPaused
             )
             .ignoresSafeArea()
-
-            VStack {
-                placementStatusView
-                Spacer()
-                #if DEBUG
-                debugMotionOverlay
-                #endif
-                debugControlsView
-            }
-            .padding()
             
-            //Added - Instruction Bubble
+            
+//            VStack {
+//                placementStatusView
+//                Spacer()
+//                #if DEBUG
+//                debugMotionOverlay
+//                #endif
+//                debugControlsView
+//            }
+//            .padding()
+
+            // Instruction bubble
             VStack {
                 InstructionView(step: InstructionDerivation.currentInstruction(for: store.state))
                     .padding(.top, 150)
                 Spacer()
             }
             .padding(.horizontal, 60)
-            
-            VStack{
+
+            VStack {
                 Spacer()
-                
                 HStack {
                     inHandInfoButton
                     Spacer()
@@ -56,34 +56,46 @@ struct ARExperimentView: View {
             }
             .padding(.leading, 24)
             .padding(.bottom, 24)
-
-            // Interact button pinned to the right edge, vertically centered
+            
+            
+            GeometryReader { geo in
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .frame(width: geo.size.width * 0.4, height: geo.size.height)
+                            .position(x: geo.size.width * 0.8, y: geo.size.height / 2)
+                            .onTapGesture {
+                                performInteraction()
+                            }
+                    }
+                    .ignoresSafeArea()
+            
+            // Thermostat — real Slider, consumes its own drag/tap before the screen tap fires.
             HStack {
                 Spacer()
                 VStack {
                     Spacer()
-                    interactButton
+                    interactIndicator
                     Spacer()
                 }
             }
             .padding(.trailing, 20)
 
-            // Pause button — top-right corner, only after all items placed
+            // Pause button
             if store.state.ar.placement == .allPlaced && !store.state.ar.isPaused {
                 VStack {
                     HStack {
                         Spacer()
-                        Button {store.send(.ar(.pauseSession))}
+                        Button { store.send(.ar(.pauseSession)) }
                         label: {
                             Image(systemName: "pause.fill")
                                 .font(.system(size: 20, weight: .semibold))
-                                //.foregroundStyle(.black)
                                 .frame(width: 57, height: 57)
                         }
                         .buttonStyle(.plain)
-                        .background {Capsule()
-                                .fill(Color(red: 0.949, green: 0.729, blue: 0.216).opacity(0.85)
-                                ).glassEffect()
+                        .background {
+                            Capsule()
+                                .fill(Color(red: 0.949, green: 0.729, blue: 0.216).opacity(0.85))
+                                .glassEffect()
                         }
                         .contentShape(Capsule())
                     }
@@ -99,112 +111,145 @@ struct ARExperimentView: View {
                     .animation(.easeInOut(duration: 0.2), value: store.state.ar.isPaused)
             }
         }
-        #if DEBUG
-        .onDisappear { motionObserver.stop() }
-        #endif
+//        #if DEBUG
+//        .onDisappear { motionObserver.stop() }
+//        #endif
     }
 
     // MARK: - Placement status
 
-    @ViewBuilder
-    private var placementStatusView: some View {
-        let label: String = {
-            switch store.state.ar.placement {
-            case .placingVolcano: return "Place the volcano"
-            case .placingSideA:   return "Place Side A bench"
-            case .placingSideB:   return "Place Side B bench"
-            case .allPlaced:      return "Experiment ready"
-            }
-        }()
-        Text(label)
-            .font(.headline)
-            .foregroundColor(.white)
-            .padding(8)
-            .background(.ultraThinMaterial)
-            .cornerRadius(8)
-    }
+//    @ViewBuilder
+//    private var placementStatusView: some View {
+//        let label: String = {
+//            switch store.state.ar.placement {
+//            case .placingVolcano: return "Place the volcano"
+//            case .placingSideA:   return "Place Side A bench"
+//            case .placingSideB:   return "Place Side B bench"
+//            case .allPlaced:      return "Experiment ready"
+//            }
+//        }()
+//        Text(label)
+//            .font(.headline)
+//            .foregroundColor(.white)
+//            .padding(8)
+//            .background(.ultraThinMaterial)
+//            .cornerRadius(8)
+//    }
 
     // MARK: - Interact button (Hold / Release / Tilt prompt / Beaker lock-in / Shake prompt)
 
+//    @ViewBuilder
+//    private var interactButton: some View {
+//        if store.state.ar.placement == .allPlaced {
+//            if let (side, index) = heldIngredientSideIndex {
+//                let ingredient = store.state.experiment[side].ingredients[index]
+//                // Holding an ingredient — Release + optional tilt prompt + thermostat for water.
+//                VStack(spacing: 10) {
+//                    // Thermostat — only when holding water.
+//                    if ingredient.type == .water {
+//                        waterThermostat(side: side, index: index)
+//                    }
+//
+//                    if isNearMixingBeaker {
+//                        Text("Tilt to pour! ↕")
+//                            .font(.caption.bold())
+//                            .foregroundColor(.yellow)
+//                            .padding(.horizontal, 10)
+//                            .padding(.vertical, 4)
+//                            .background(.black.opacity(0.55))
+//                            .cornerRadius(6)
+//                    }
+//                    Button("Release") {
+//                        store.send(.ar(.releaseIngredient(side, index)))
+//                    }
+//                    .buttonStyle(.borderedProminent)
+//                    .tint(.orange)
+//                }
+//                .transition(.scale.combined(with: .opacity))
+//                .animation(.easeInOut(duration: 0.2), value: isNearMixingBeaker)
+//
+//            } else if let side = heldBeakerSide {
+//                // Locked in to beaker — prompt player to physically shake the device.
+//                VStack(spacing: 6) {
+//                    Text("Shake to mix! 〜")
+//                        .font(.caption.bold())
+//                        .foregroundColor(.cyan)
+//                        .padding(.horizontal, 10)
+//                        .padding(.vertical, 4)
+//                        .background(.black.opacity(0.55))
+//                        .cornerRadius(6)
+//                    Button("Release") {
+//                        store.send(.ar(.mixingBeakerProximityChanged(side, .far)))
+//                    }
+//                    .buttonStyle(.borderedProminent)
+//                    .tint(.orange)
+//                }
+//                .transition(.scale.combined(with: .opacity))
+//
+//            } else if let side = mixableBeakerSide {
+//                // Near a ready-to-mix beaker — Interact locks in; physical shake then mixes.
+//                Button("Interact") {
+//                    store.send(.ar(.mixingBeakerProximityChanged(side, .inHand)))
+//                }
+//                .buttonStyle(.borderedProminent)
+//                .tint(.cyan)
+//                .transition(.scale.combined(with: .opacity))
+//
+//            } else if store.state.experiment.volcanoState == .highlighted {
+//                // Both beakers mixed — prompt player to interact with the volcano.
+//                Button("Interact") {
+//                    store.send(.ar(.interactWithVolcano))
+//                }
+//                .buttonStyle(.borderedProminent)
+//                .tint(.orange)
+//                .transition(.scale.combined(with: .opacity))
+//
+//            } else {
+//                // Default — always show Hold, disabled (grey) when nothing is highlighted.
+//                let highlighted = highlightedIngredient
+//                Button("Hold") {
+//                    if let (side, index) = highlighted {
+//                        store.send(.ar(.pickupIngredient(side, index)))
+//                    }
+//                }
+//                .buttonStyle(.borderedProminent)
+//                .tint(highlighted != nil ? .green : .gray)
+//                .disabled(highlighted == nil)
+//                .transition(.scale.combined(with: .opacity))
+//            }
+//        }
+//    }
+    // MARK: - Interact dispatch (tap right side of screen instead of a button)
+
+    private func performInteraction() {
+        guard store.state.ar.placement == .allPlaced else { return }
+        guard !store.state.ar.isPaused else { return }
+
+        if let (side, index) = heldIngredientSideIndex {
+            store.send(.ar(.releaseIngredient(side, index)))
+
+        } else if let side = heldBeakerSide {
+            store.send(.ar(.mixingBeakerProximityChanged(side, .far)))
+
+        } else if let side = mixableBeakerSide {
+            store.send(.ar(.mixingBeakerProximityChanged(side, .inHand)))
+
+        } else if store.state.experiment.volcanoState == .highlighted {
+            store.send(.ar(.interactWithVolcano))
+
+        } else if let (side, index) = highlightedIngredient {
+            store.send(.ar(.pickupIngredient(side, index)))
+        }
+        // else: nothing valid to interact with — tap does nothing (same as disabled button before)
+    }
+    
     @ViewBuilder
-    private var interactButton: some View {
-        if store.state.ar.placement == .allPlaced {
-            if let (side, index) = heldIngredientSideIndex {
-                let ingredient = store.state.experiment[side].ingredients[index]
-                // Holding an ingredient — Release + optional tilt prompt + thermostat for water.
-                VStack(spacing: 10) {
-                    // Thermostat — only when holding water.
-                    if ingredient.type == .water {
-                        waterThermostat(side: side, index: index)
-                    }
-
-                    if isNearMixingBeaker {
-                        Text("Tilt to pour! ↕")
-                            .font(.caption.bold())
-                            .foregroundColor(.yellow)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(.black.opacity(0.55))
-                            .cornerRadius(6)
-                    }
-                    Button("Release") {
-                        store.send(.ar(.releaseIngredient(side, index)))
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.orange)
-                }
+    private var interactIndicator: some View {
+        if store.state.ar.placement == .allPlaced,
+           let (side, index) = heldIngredientSideIndex,
+           store.state.experiment[side].ingredients[index].type == .water {
+            waterThermostat(side: side, index: index)
                 .transition(.scale.combined(with: .opacity))
-                .animation(.easeInOut(duration: 0.2), value: isNearMixingBeaker)
-
-            } else if let side = heldBeakerSide {
-                // Locked in to beaker — prompt player to physically shake the device.
-                VStack(spacing: 6) {
-                    Text("Shake to mix! 〜")
-                        .font(.caption.bold())
-                        .foregroundColor(.cyan)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(.black.opacity(0.55))
-                        .cornerRadius(6)
-                    Button("Release") {
-                        store.send(.ar(.mixingBeakerProximityChanged(side, .far)))
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.orange)
-                }
-                .transition(.scale.combined(with: .opacity))
-
-            } else if let side = mixableBeakerSide {
-                // Near a ready-to-mix beaker — Interact locks in; physical shake then mixes.
-                Button("Interact") {
-                    store.send(.ar(.mixingBeakerProximityChanged(side, .inHand)))
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.cyan)
-                .transition(.scale.combined(with: .opacity))
-
-            } else if store.state.experiment.volcanoState == .highlighted {
-                // Both beakers mixed — prompt player to interact with the volcano.
-                Button("Interact") {
-                    store.send(.ar(.interactWithVolcano))
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.orange)
-                .transition(.scale.combined(with: .opacity))
-
-            } else {
-                // Default — always show Hold, disabled (grey) when nothing is highlighted.
-                let highlighted = highlightedIngredient
-                Button("Hold") {
-                    if let (side, index) = highlighted {
-                        store.send(.ar(.pickupIngredient(side, index)))
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(highlighted != nil ? .green : .gray)
-                .disabled(highlighted == nil)
-                .transition(.scale.combined(with: .opacity))
-            }
         }
     }
 
@@ -214,34 +259,86 @@ struct ARExperimentView: View {
     private func waterThermostat(side: StationSide, index: Int) -> some View {
         VStack(spacing: 4) {
             Text("\(Int(waterTempC))°C")
-                .font(.caption.bold())
-                .foregroundColor(.cyan)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.white)
                 .monospacedDigit()
-            // Rotate a normal slider -90° to make it vertical.
-            // frame(width:) before rotation sets the slider's natural length (= visual height).
-            Slider(value: $waterTempC, in: 20...90, step: 1)
-                .frame(width: 150)
-                .rotationEffect(.degrees(-90))
-                .frame(width: 44, height: 150)
-                .tint(.cyan)
-            Text("20°")
-                .font(.caption2)
-                .foregroundColor(.white.opacity(0.6))
+
+            TemperatureSlider(
+                value: $waterTempC,
+                range: 20...80
+            )
+            .frame(width: 113, height: 356)
+
+            Text("20°C")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(.white.opacity(0.8))
         }
-        .padding(10)
+        .padding(.vertical, 20)
+        .padding(.horizontal, 5)
         .background(.ultraThinMaterial)
-        .cornerRadius(10)
+        .cornerRadius(80)
         .onChange(of: waterTempC) { _, newVal in
             store.send(.ar(.adjustWaterTemperature(newVal)))
         }
         .onAppear {
             // Sync slider to any previously stored temperature.
-            if let stored = store.state.experiment[side].ingredients[index].temperatureC {
+            if let stored = store.state.experiment[side]
+                .ingredients[index]
+                .temperatureC {
                 waterTempC = stored
             }
         }
     }
 
+    private struct TemperatureSlider: View {
+        @Binding var value: Double
+
+        let range: ClosedRange<Double>
+
+        var body: some View {
+            GeometryReader { geometry in
+                ZStack {
+                    // Gradient track
+                    LinearGradient(colors: [.cyan, .yellow, .red],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                    .frame(width: 8)
+                    .clipShape(Capsule())
+
+                    // Thumb
+                    Circle()
+                        .fill(.white)
+                        .frame(width: 40, height: 40)
+                        .shadow(color: .black.opacity(0.3),radius: 4)
+                        .position(
+                            x: geometry.size.width / 2,
+                            y: thumbY(in: geometry.size.height)
+                        )
+                        .gesture(
+                            DragGesture()
+                                .onChanged { gesture in
+                                    let y = min(
+                                        max(gesture.location.y,0),
+                                        geometry.size.height)
+                                    let percentage = 1 - (y / geometry.size.height)
+                                    let newValue = range.lowerBound + percentage * (range.upperBound - range.lowerBound)
+                                    value = newValue.rounded()
+                                }
+                        )
+                }
+            }
+        }
+
+        private func thumbY(in height: CGFloat) -> CGFloat {
+            let percentage =
+                (value - range.lowerBound) /
+                (range.upperBound - range.lowerBound)
+
+            return height * (1 - percentage)
+        }
+    }
+    
     // MARK: - Info button (shows ingredient info while holding)
 
     @ViewBuilder
@@ -253,12 +350,12 @@ struct ARExperimentView: View {
             }label:{
                 Image(systemName: "info")
                     .font(.system(size: 20, weight: .semibold))
-                    //.foregroundStyle(.black)
+                    .foregroundStyle(.white)
                     .frame(width: 57, height: 57)
                     }
                     .buttonStyle(.plain)
                     .background {
-                        Capsule().fill(Color(red: 0.949,green: 0.729,blue: 0.216)
+                        Capsule().fill(customColors.appYellow
                                 .opacity(0.85)
                             )
                             .glassEffect()
@@ -370,7 +467,7 @@ struct ARExperimentView: View {
                 // ── Tilt / Pour ──
                 Text("TILT (pour)")
                     .font(.caption2.bold()).foregroundColor(.white.opacity(0.6))
-                Text("Pitch: \(motionObserver.pitchDeg, specifier: "%.1f")°  (fires at >45°)")
+                Text("Pitch: \(motionObserver.pitchDeg, specifier: "%.1f")°  (fires at >30°)")
                     .font(.caption.monospaced())
                     .foregroundColor(motionObserver.pitchDeg > 45 ? .yellow : .white)
                 Text("Held: \(heldIngredientSideIndex.map { "\($0.0 == .sideA ? "A" : "B")[\($0.1)]" } ?? "none")  Near beaker: \(isNearMixingBeaker ? "yes" : "no")")

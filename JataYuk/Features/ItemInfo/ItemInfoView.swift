@@ -22,10 +22,11 @@ struct ItemInfoView: View {
                 Color.black.opacity(0.45).ignoresSafeArea().onTapGesture(perform: close)
                 
                 HStack {
-                    card
-                        .frame(width: geometry.size.width * 0.5)
+                    card.frame(width: geometry.size.width * 0.5,
+                               height: geometry.size.height * 0.95
+                        )
                         .padding(.leading, 24)
-                    
+
                     Spacer()
                 }
             }
@@ -41,23 +42,29 @@ struct ItemInfoView: View {
             closeButton
             titleBlock
 
-            VStack(alignment: .leading, spacing: 18) {
-                ForEach(
-                    Array(info.sections.enumerated()),
-                    id: \.element.id
-                ) { index, section in
-                    sectionRow(
-                        section,
-                        isMascotOnLeft: index % 2 != 0
-                    )
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 30) {
+                    ForEach(
+                        Array(info.sections.enumerated()),
+                        id: \.element.id
+                    ) { index, section in
+                        sectionRow(
+                            section,
+                            isMascotOnLeft: index % 2 != 0
+                        )
+                    }
                 }
             }
         }
         .padding(24)
         .background(
             RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(Color(red: 0.09, green: 0.09, blue: 0.11))
-                .shadow(color: .black.opacity(0.35), radius: 20, y: 10)
+                .fill(customColors.appBlack.opacity(0.9))
+                .shadow(
+                    color: .black.opacity(0.35),
+                    radius: 20,
+                    y: 10
+                )
         )
     }
 
@@ -70,8 +77,7 @@ struct ItemInfoView: View {
                             .foregroundStyle(.white)
                             .frame(width: 44, height: 44)
                             .background {
-                                Capsule().fill(Color(red: 0.949, green: 0.729, blue: 0.216).opacity(0.85)
-                                    )
+                                Capsule().fill(customColors.appYellow).opacity(0.85)
                                     .glassEffect()
                             }
                     }
@@ -83,12 +89,12 @@ struct ItemInfoView: View {
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(info.title)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .font(.custom("Fredoka-Bold", size: 34))
+                .foregroundColor(customColors.titleCream)
 
             Text(info.description)
-                .font(.subheadline.weight(.semibold))
-                .foregroundColor(.yellow)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(customColors.appYellow)
         }
     }
 
@@ -114,12 +120,12 @@ struct ItemInfoView: View {
     private func sectionContent(_ section: ItemInfoSection) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(section.heading)
-                .font(.headline)
+                .font(.custom("Fredoka-SemiBold", size: 24))
                 .foregroundColor(.white)
 
             Text(section.body)
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.75))
+                .font(.system(size: 20, weight: .regular))
+                .foregroundColor(.white)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -128,12 +134,12 @@ struct ItemInfoView: View {
 
     @ViewBuilder
     private func mascot(for section: ItemInfoSection) -> some View {
-        if let imageName = section.mascotImageName {
-            Image(imageName)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 80, height: 80)
-        }
+        Image("Mascot")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 150, height: 120)
+            .rotationEffect(.degrees(5))
+            .shadow(color: .white.opacity(0.6), radius: 10, x: 4, y: 4)
     }
 
     private func close() {

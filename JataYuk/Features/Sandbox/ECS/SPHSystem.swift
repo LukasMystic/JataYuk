@@ -64,7 +64,7 @@ final class SPHSystem {
                 defer { self.isMeshing = false }
                 guard gen == self.meshGeneration else { return }
                 if let mesh {
-                    self.surfaceEntity.model = ModelComponent(mesh: mesh, materials: [Self.foamMaterial])
+                    self.surfaceEntity.model = ModelComponent(mesh: mesh, materials: [self.foamMaterial])
                     self.surfaceEntity.isEnabled = true
                 }
             }
@@ -80,7 +80,7 @@ final class SPHSystem {
         surfaceEntity.model = nil
     }
 
-    private static var foamMaterial: RealityKit.Material = {
+    private var foamMaterial: RealityKit.Material = {
         var mat = PhysicallyBasedMaterial()
         mat.baseColor = .init(tint: UIColor(white: 0.98, alpha: 1.0))
         mat.roughness = 0.55
@@ -89,4 +89,17 @@ final class SPHSystem {
         mat.faceCulling = .none
         return mat
     }()
+
+    func setFoamColor(_ color: UIColor) {
+        var mat = PhysicallyBasedMaterial()
+        mat.baseColor = .init(tint: color)
+        mat.roughness = 0.55
+        mat.metallic = 0.0
+        mat.clearcoat = 0.3
+        mat.faceCulling = .none
+        foamMaterial = mat
+        if let model = surfaceEntity.model {
+            surfaceEntity.model = ModelComponent(mesh: model.mesh, materials: [foamMaterial])
+        }
+    }
 }
