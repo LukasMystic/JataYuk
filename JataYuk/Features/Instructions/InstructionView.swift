@@ -25,20 +25,30 @@ struct InstructionView: View {
     private func bubble(for step: InstructionStep) -> some View {
         HStack(alignment: .top) {
             Text(step.description)
-                .font(.subheadline)
+                .font(.system(size: 15, weight: .regular))
                 .foregroundColor(.white)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: 480, alignment: .leading)
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 20)
-        .background(Color.black.opacity(0.75)) //change color later
+        .background(customColors.appBlack.opacity(0.75))
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(alignment: .trailing) {
-//            Image("Mascot")
+        .overlay(alignment: .trailing
+        
+        
+        
+        
+        ) {
+            Image("Mascot")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 100, height: 100)
+                .scaleEffect(1.5)
+                .offset(x: 40)
+                .rotationEffect(.degrees(5))
+                .shadow(color: .white.opacity(0.6), radius: 10, x: 4, y: 4)
         }
         .padding(.trailing, 44) // room for the mascot spilling past the bubble edge
     }
 }
- 
-

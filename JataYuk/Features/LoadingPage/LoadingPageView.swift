@@ -17,30 +17,39 @@ struct LoadingPageView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Color(red: 0.965, green: 0.945, blue: 0.902)
+                Color(customColors.appCream)
                     .ignoresSafeArea()
 
-                    Image("VolcanoBackground")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: geometry.size.width,
-                               height: geometry.size.height * 0.85)
-                                .frame(maxHeight: .infinity, alignment: .bottom)
-
-                VStack(spacing: 18) {
-                    Spacer()
-                        .frame(height: geometry.size.height * 0.25)
-
-                    currentGuideCard
-                        .frame(height: 550)
-                        .padding(.horizontal, 40)
-
-                    pageDots
-
-                    progressBar .frame(maxWidth: 420)
-                    
-                    Spacer()
+                Image("VolcanoBackground")
+                    .resizable()
+                    .scaledToFill()
+                    .scaleEffect(1.20)
+                    .frame(
+                        width: geometry.size.width,
+                        height: geometry.size.height * 0.85
+                    )
+                    .frame(
+                        maxHeight: .infinity,
+                        alignment: .bottom
+                    )
+                
+                VStack{
+                    currentGuideCard.padding(.horizontal, 50)
+                        .offset(y:-30)
                 }
+                
+                VStack(spacing: 18) {
+                    
+                Spacer()
+
+                pageDots
+
+                Spacer().frame(height: 20)
+
+                progressBar.frame(maxWidth: 420)
+
+                Spacer().frame(height: geometry.size.height * 0.08)
+                    }
             }
         }
         .ignoresSafeArea()
@@ -77,9 +86,7 @@ struct LoadingPageView: View {
                         ? Color.black.opacity(0.7)
                         : Color.black.opacity(0.25)
                     )
-                    .frame(
-                        width: 6,
-                        height: 6
+                    .frame(width: 6,height: 6
                     )
             }
         }
@@ -105,14 +112,4 @@ struct LoadingPageView: View {
         }
         .frame(height: 6)
     }
-}
-
-#Preview(traits: .landscapeLeft) {
-    LoadingPageView(
-        store: Store(
-            initialState: LoadingPageState(),
-            reducer: LoadingPageReducer.reduce,
-            environment: RootEnvironment()
-        )
-    )
 }
