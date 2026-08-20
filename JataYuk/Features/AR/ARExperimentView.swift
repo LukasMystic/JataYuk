@@ -467,7 +467,7 @@ struct ARExperimentView: View {
                 // ── Tilt / Pour ──
                 Text("TILT (pour)")
                     .font(.caption2.bold()).foregroundColor(.white.opacity(0.6))
-                Text("Pitch: \(motionObserver.pitchDeg, specifier: "%.1f")°  (fires at >45°)")
+                Text("Pitch: \(motionObserver.pitchDeg, specifier: "%.1f")°  (fires at >30°)")
                     .font(.caption.monospaced())
                     .foregroundColor(motionObserver.pitchDeg > 45 ? .yellow : .white)
                 Text("Held: \(heldIngredientSideIndex.map { "\($0.0 == .sideA ? "A" : "B")[\($0.1)]" } ?? "none")  Near beaker: \(isNearMixingBeaker ? "yes" : "no")")
