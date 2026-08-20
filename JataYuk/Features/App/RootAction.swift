@@ -11,8 +11,12 @@ enum RootAction {
     case navigate(to: AppRoute)
     case overlay(OverlayAction)
     case ar(ARAction)
+    case end(EndAction)
+    case onboarding(OnboardingAction)
+    case loadingPage(LoadingPageAction)
+    case mainPage(MainPageAction)
+    case playButtonSound   // added
 }
-
 // MARK: - Overlay Actions
 
 enum OverlayAction {
@@ -38,4 +42,17 @@ enum ARAction {
     case shakeMixingBeaker(StationSide)
     case interactWithVolcano
     case reactionTick(Double)
+    case pauseSession
+    case resumeSession
+    case resetSession
+}
+
+
+// MARK: - EndPage Actions
+// Drives the 15s auto-reveal of the end screen overlay + eye toggle,
+// following the same start-timestamp + tick pattern as ARAction.reactionTick.
+
+enum EndAction {
+    case revealTick(Double)   // elapsed seconds since the volcano finished
+    case toggleOverlay
 }

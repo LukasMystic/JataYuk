@@ -9,17 +9,20 @@ import Foundation
 
 enum BGMTrack: Equatable {
     case onboarding
+    case main
     case experiment
-    case end
 }
 
 enum SoundEffect: Equatable {
-    case pour
-    case shake
-    case mix
-    case beakerSelect
-    case buttonTap
-    case reactionStart
-    case explosion
-    case foamSettle
+    case buttonPress
+    case placeDishSoapOrFoodColoring
+    case placeGlass(StationSide)
+    case pourSand
+    case pourLiquid
+    case scoopSand
+    case mixOrShake
+    case volcanoPlacement
+    case volcanoReacting
+    case volcanoOutcome
+    case wrongPlacement
 }
