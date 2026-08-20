@@ -27,13 +27,20 @@ struct RootView: View {
     @ViewBuilder
     private var routeView: some View {
         switch store.state.currentRoute {
+        case .loading:
+            LoadingPageView(store: store)
         case .onboarding:
             OnboardingView(store: store)
+        case .main:
+            MainPageView(store: store)
         case .ar:
             ARExperimentView(store: store)
         case .end:
             EndView(store: store)
         }
+    }.onAppear {
+        store.send(.loadingPage(.onAppear))
+        store.send(.navigate(to: store.state.currentRoute))
     }
 }
 

@@ -51,9 +51,7 @@ struct LoadingPageReducer {
                         nanoseconds: 300_000_000
                     )
 
-                    send(
-                        LoadingPageAction.didFinishLoading
-                    )
+                    send(RootAction.loadingPage(.didFinishLoading))
                 }
             ]
 
@@ -75,9 +73,7 @@ private extension LoadingPageReducer {
                 nanoseconds: 2_500_000_000
             )
 
-            send(
-                LoadingPageAction.loadingFinished
-            )
+            send(RootAction.loadingPage(.loadingFinished)) 
         }
     }
 
@@ -89,9 +85,7 @@ private extension LoadingPageReducer {
                     nanoseconds: 2_500_000_000
                 )
 
-                send(
-                    LoadingPageAction.guideTicked
-                )
+                send(RootAction.loadingPage(.guideTicked))
             }
         }
     }

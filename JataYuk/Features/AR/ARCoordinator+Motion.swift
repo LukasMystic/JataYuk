@@ -13,7 +13,10 @@ extension ARCoordinator {
         motionClient.startTiltMonitoring { [weak self] in
             guard let self,
                   let (side, index) = activePourTarget() else { return }
+            let type = store.state.experiment[side].ingredients[index].type   // added — capture before dispatch
+            let pourEntity = carriedEntity                                     // added — capture before detach
             store.send(.ar(.pourIngredient(side, index)))
+            playPourSFX(for: type, entity: pourEntity)                         // added
             // TODO: trigger PoC pour animation here before detaching.
             store.send(.ar(.releaseIngredient(side, index)))
             detachCarriedEntity()
@@ -28,6 +31,7 @@ extension ARCoordinator {
             store.send(.ar(.shakeMixingBeaker(side)))
             if let beaker = beakerEntities[side] {
                 animateBeakerMix(beaker)
+                playSFX(.mixOrShake, on: beaker)   // added
             }
             store.send(.ar(.mixingBeakerProximityChanged(side, .far)))
             syncAllIngredientVisuals()

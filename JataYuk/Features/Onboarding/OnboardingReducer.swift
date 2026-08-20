@@ -30,8 +30,8 @@ func OnboardingReducer(state: inout RootState, action: OnboardingAction, environ
 
     case .animationFinished:
         state.onboarding.isButtonPressed = false
-        state.currentRoute = .ar
-        return []
+        state.currentRoute = .main            // was .ar
+        return bgmEffects(for: .main, environment: environment)   // was return []
         
     case .didFinishOnboarding:
         return []
