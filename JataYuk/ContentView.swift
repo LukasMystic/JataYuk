@@ -14,7 +14,11 @@ struct ContentView: View {
     )
 
     var body: some View {
-        RootView(store: store)
+        if ShaderPreviewGate.isEnabled {
+            ShaderPreviewView()
+        } else {
+            RootView(store: store)
+        }
     }
 }
 
