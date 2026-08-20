@@ -175,18 +175,12 @@ private func arReducer(state: inout RootState, action: ARAction, environment: Ro
         case .yeast:   state.experiment.foam.yeastTbsp  += ingredient.amountPerPour
         case .water: break
         case .foodColoring:
-            // One food color is enough — deplete the other variants immediately.
-            for i in state.experiment[side].ingredients.indices {
-                let ing = state.experiment[side].ingredients[i]
-                if ing.type == .foodColoring, i != index, ing.grayOutReason != .depleted {
-                    state.experiment[side].ingredients[i].grayOutReason = .depleted
-                }
-            }
-            // Record which color was selected (0=R, 1=G, 2=B) by counting food colorings before this index.
+            // Accumulate pours per color so the foam can blend all selected colors.
+            // 0 = red, 1 = green, 2 = blue (matches spawnIngredients tint order).
             let fcIndex = state.experiment[side].ingredients.prefix(index)
                 .filter { $0.type == .foodColoring }
                 .count
-            state.experiment.foam.foodColorIndex = fcIndex
+            state.experiment.foam.foodColorPours[fcIndex, default: 0] += 1
         }
         state.experiment[side].ingredients[index].hasPouredThisPickup = true //added
 
@@ -236,6 +230,7 @@ private func arReducer(state: inout RootState, action: ARAction, environment: Ro
             state.experiment.volcanoState = .done
             state.experiment.reactionState = .done
             state.end.volcanoDoneAt = Date()
+            state.currentRoute = .end
         }
 
     case .pauseSession:
@@ -267,7 +262,7 @@ private func endReducer(state: inout RootState, action: EndAction) -> [Effect] {
     switch action {
     case .revealTick(let elapsed):
         guard state.end.volcanoDoneAt != nil, !state.end.hasRevealedControls else { break }
-        if elapsed >= 15 {
+        if elapsed >= 3 {
             state.end.isOverlayVisible = true
             state.end.hasRevealedControls = true
         }

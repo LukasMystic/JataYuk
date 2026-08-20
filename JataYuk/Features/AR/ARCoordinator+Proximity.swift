@@ -58,7 +58,7 @@ extension ARCoordinator {
         if let carried = carriedEntity,
            let comp = carried.components[IngredientComponent.self] {
             let ingredient = store.state.experiment[comp.side].ingredients[comp.ingredientIndex]
-            if ingredient.proximityState != .inHand { detachCarriedEntity() }
+            if ingredient.proximityState != .inHand { placebackEntity() }
         }
 
         let cameraPos = arView.cameraTransform.translation

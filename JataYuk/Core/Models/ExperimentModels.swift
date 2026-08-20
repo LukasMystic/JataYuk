@@ -114,8 +114,8 @@ struct FoamModel: Equatable {
     var tempC: Double = 30
     var containerRadiusCm: Double = 5
     var containerVolumeL: Double = 1
-    /// 0 = red, 1 = green, 2 = blue. nil means no food coloring was added.
-    var foodColorIndex: Int? = nil
+    /// Pour counts per food coloring slot: key 0 = red, 1 = green, 2 = blue.
+    var foodColorPours: [Int: Int] = [:]
 }
 
 struct FoamResult: Equatable {

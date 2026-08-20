@@ -9,10 +9,7 @@ import SwiftUI
 
 struct LoadingPageView: View {
 
-    @ObservedObject var store: Store<
-        LoadingPageState,
-        LoadingPageAction
-    >
+    @ObservedObject var store: Store<RootState, RootAction>
 
     var body: some View {
         GeometryReader { geometry in
@@ -54,21 +51,21 @@ struct LoadingPageView: View {
         }
         .ignoresSafeArea()
         .onAppear {
-            store.send(.onAppear)
+            store.send(.loadingPage(.onAppear))
         }
         .onDisappear {
-            store.send(.onDisappear)
+            store.send(.loadingPage(.onDisappear))
         }
     }
 
     @ViewBuilder
     private var currentGuideCard: some View {
-        if store.state.guides.indices.contains(
-            store.state.currentGuideIndex
+        if store.state.loadingPage.guides.indices.contains(
+            store.state.loadingPage.currentGuideIndex
         ) {
             GuideCardView(
-                guide: store.state.guides[
-                    store.state.currentGuideIndex
+                guide: store.state.loadingPage.guides[
+                    store.state.loadingPage.currentGuideIndex
                 ]
             )
         }
@@ -77,12 +74,12 @@ struct LoadingPageView: View {
     private var pageDots: some View {
         HStack(spacing: 8) {
             ForEach(
-                store.state.guides.indices,
+                store.state.loadingPage.guides.indices,
                 id: \.self
             ) { index in
                 Circle()
                     .fill(
-                        index == store.state.currentGuideIndex
+                        index == store.state.loadingPage.currentGuideIndex
                         ? Color.black.opacity(0.7)
                         : Color.black.opacity(0.25)
                     )
@@ -102,11 +99,11 @@ struct LoadingPageView: View {
                     .fill(Color( red: 0.949, green: 0.729, blue: 0.216))
                     .frame(
                         width: geometry.size.width
-                            * store.state.progress
+                            * store.state.loadingPage.progress
                     )
                     .animation(
                         .linear(duration: 2.5),
-                       value: store.state.progress
+                       value: store.state.loadingPage.progress
                     )
             }
         }

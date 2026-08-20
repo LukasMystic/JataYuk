@@ -17,9 +17,8 @@ extension ARCoordinator {
             let pourEntity = carriedEntity                                     // added — capture before detach
             store.send(.ar(.pourIngredient(side, index)))
             playPourSFX(for: type, entity: pourEntity)                         // added
-            // TODO: trigger PoC pour animation here before detaching.
             store.send(.ar(.releaseIngredient(side, index)))
-            detachCarriedEntity()
+            placebackEntity()
             syncAllIngredientVisuals()
         }
     }
@@ -64,11 +63,18 @@ extension ARCoordinator {
         return nil
     }
 
-    // True when every selectable ingredient has at least one pour. Unselected h2o2 variants
-    // (.depleted with pourCount == 0) are skipped — they were never interactable.
+    // True when every selectable ingredient has at least one pour.
+    // Food colorings are treated as a group: one pour from any bottle satisfies all three.
+    // Unselected h2o2 variants (.depleted, pourCount == 0) are skipped — never interactable.
     func allIngredientsPoured(side: StationSide) -> Bool {
-        !store.state.experiment[side].ingredients.contains {
-            $0.pourCount == 0 && $0.grayOutReason != .depleted
+        let ingredients = store.state.experiment[side].ingredients
+        let anyFoodColorPoured = ingredients.contains { $0.type == .foodColoring && $0.pourCount > 0 }
+        return !ingredients.contains { ing in
+            guard ing.grayOutReason != .depleted else { return false }
+            guard ing.pourCount == 0 else { return false }
+            // A food coloring bottle with 0 pours is OK as long as another was poured.
+            if ing.type == .foodColoring { return !anyFoodColorPoured }
+            return true
         }
     }
 

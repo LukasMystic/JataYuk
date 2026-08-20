@@ -45,6 +45,7 @@ struct OnboardingView: View {
     
     private var exploreButton: some View {
         Button {
+            store.send(.playButtonSound)
             store.send(.onboarding(.letsExploreTapped))
         } label: {
             Text("Let's Explore!")

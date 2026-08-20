@@ -26,18 +26,14 @@ struct EndView: View {
             )
             .ignoresSafeArea()
             
-            // Blur layer
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea()
-            
-            // Dark layer
-            Color.black
-                .opacity(0.3)
-                .ignoresSafeArea()
-            
-            // MARK: - Success overlay — all components appear together
+            // MARK: - Success overlay + backdrop — visible only when overlay is shown
             if store.state.end.isOverlayVisible {
+                // Subtle dark layer only — no blur, so the eruption mess stays visible.
+                Color.black
+                    .opacity(0.15)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+
                 VStack(spacing: 24) {
                     Image("Title")
                         .frame(alignment: .center)
@@ -115,8 +111,7 @@ struct EndView: View {
 
     private var experimentAgainButton: some View {
         Button {
-            // Reset the experiment/AR placement state, then jump back to
-            // the start of the AR flow (not onboarding).
+            store.send(.playButtonSound)
             store.send(.ar(.resetSession))
             store.send(.navigate(to: .ar))
         } label: {

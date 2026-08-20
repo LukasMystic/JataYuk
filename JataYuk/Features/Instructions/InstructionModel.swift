@@ -44,18 +44,18 @@ enum InstructionCopy {
         // MARK: AR Placement
 
         .init(key: .placeVolcano, stepNumber: 0, context: .arPlacement,
-              title: "Place the volcano",
-              description: "Place the volcano anywhere on your room.\n\nTap on your screen to place it",
+              title: "Set up your experiment",
+              description: "Point your camera at a flat surface, then tap to place the volcano and both ingredient stations all at once!",
               animation: nil),
 
         .init(key: .placeSideA, stepNumber: 1, context: .arPlacement,
-              title: "Place Side A",
-              description: "Great job! Now place the first set of ingredients.",
+              title: "Setting up…",
+              description: "Placing your experiment on the surface.",
               animation: nil),
 
         .init(key: .placeSideB, stepNumber: 2, context: .arPlacement,
-              title: "Place Side B",
-              description: "Yay! Now place the second set.",
+              title: "Setting up…",
+              description: "Placing your experiment on the surface.",
               animation: nil),
 
         .init(key: .introSolutions, stepNumber: 3, context: .arPlacement,

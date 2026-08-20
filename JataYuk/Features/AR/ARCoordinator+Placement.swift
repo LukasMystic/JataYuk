@@ -21,9 +21,9 @@ extension ARCoordinator {
 
         if isTooClose(to: result.worldTransform) {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
-            if let nearestEntity = volcanoEntity ?? beakerEntities[.sideA] ?? beakerEntities[.sideB] {  // added
-                playSFX(.wrongPlacement, on: nearestEntity)             // added — best-effort position; refine once you have the actual invalid-tap location as an entity
-            }                                                            // added
+            if let nearestEntity = volcanoEntity ?? beakerEntities[.sideA] ?? beakerEntities[.sideB] {
+                playSFX(.wrongPlacement, on: nearestEntity)
+            }
             return
         }
 
@@ -31,6 +31,7 @@ extension ARCoordinator {
         Task { @MainActor [weak self] in
             guard let self else { return }
             defer { isPlacing = false }
+            await preloadSFX()
             await placeScene(at: result.worldTransform,
                              planeAnchor: result.anchor as? ARPlaneAnchor,
                              in: arView)
@@ -61,36 +62,15 @@ extension ARCoordinator {
                             in arView: ARView) async {
         let pos = SIMD3<Float>(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
 
-        switch store.state.ar.placement {
-        case .placingVolcano:
-            let volEnt = await loadAsset(.snowyVolcano, fallbackColor: .systemGray.withAlphaComponent(0.4), fallbackSize: [0.1, 0.2, 0.1])
-            anchor.addChild(volEnt)
-            arView.scene.addAnchor(anchor)
-            volcanoAnchor = anchor
-            volcanoPosition = pos
-            volcanoEntity = volEnt
-            playSFX(.volcanoPlacement, on: volEnt)                    // added
-
-        case .placingSideA:
-            arView.scene.addAnchor(anchor)
-            stationAAnchor = anchor
-            stationAPosition = pos
-            await spawnMixingBeaker(on: anchor, side: .sideA)
-            if let beaker = beakerEntities[.sideA] {                  // added
-                playSFX(.placeGlass(.sideA), on: beaker)               // added
-            }                                                          // added
-
-        case .placingSideB:
-            arView.scene.addAnchor(anchor)
-            stationBAnchor = anchor
-            stationBPosition = pos
-            await spawnMixingBeaker(on: anchor, side: .sideB)
-            if let beaker = beakerEntities[.sideB] {                  // added
-                playSFX(.placeGlass(.sideB), on: beaker)               // added
-            }                                                          // added
-
-        case .allPlaced:
-            break
+        let rootAnchor: AnchorEntity
+        let base: SIMD3<Float>
+        if let pa = planeAnchor {
+            rootAnchor = AnchorEntity(anchor: pa)
+            let local = simd_inverse(pa.transform) * transform
+            base = SIMD3(local.columns.3.x, 0, local.columns.3.z)
+        } else {
+            rootAnchor = AnchorEntity(world: transform)
+            base = .zero
         }
 
         // Project camera X-axis onto the horizontal plane so stations land to
@@ -112,6 +92,7 @@ extension ARCoordinator {
         volcanoAnchor = rootAnchor
         volcanoPosition = pos
         volcanoEntity = volEnt
+        playSFX(.volcanoPlacement, on: volEnt)
 
         // Rotate each station so its local +X aligns with camRight.
         // This ensures ingredient/beaker positions (laid out along local X)

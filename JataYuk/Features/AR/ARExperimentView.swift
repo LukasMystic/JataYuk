@@ -14,6 +14,9 @@ struct ARExperimentView: View {
 
     @State private var waterTempC: Double = 25
 
+    // Drives the 30-second reaction → .done transition and navigation to the end screen.
+    private let reactionTicker = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
+
     #if DEBUG
     @StateObject private var motionObserver = MotionDebugObserver()
     @State private var isDebugExpanded = false
@@ -92,6 +95,7 @@ struct ARExperimentView: View {
                                 .frame(width: 57, height: 57)
                         }
                         .buttonStyle(.plain)
+                        .foregroundStyle(.white)
                         .background {
                             Capsule()
                                 .fill(Color(red: 0.949, green: 0.729, blue: 0.216).opacity(0.85))
@@ -110,6 +114,11 @@ struct ARExperimentView: View {
                     .transition(.opacity)
                     .animation(.easeInOut(duration: 0.2), value: store.state.ar.isPaused)
             }
+        }
+        .onReceive(reactionTicker) { _ in
+            guard let startedAt = store.state.experiment.reactionStartedAt,
+                  store.state.experiment.reactionState == .reacting else { return }
+            store.send(.ar(.reactionTick(Date().timeIntervalSince(startedAt))))
         }
 //        #if DEBUG
 //        .onDisappear { motionObserver.stop() }
@@ -405,13 +414,21 @@ struct ARExperimentView: View {
 
     // Returns the side whose beaker is ready to mix and the player is near but not yet locked in.
     // Only matches .highlighted (not .inHand) — the inHand case is handled by heldBeakerSide above.
+    // Food colorings are a group: at least one poured satisfies all three bottles.
     private var mixableBeakerSide: StationSide? {
         for side in [StationSide.sideA, StationSide.sideB] {
             let station = store.state.experiment[side]
             let beaker = station.mixingBeaker
             guard beaker.mixtureState == .prepared else { continue }
             guard beaker.proximityState == .highlighted else { continue }
-            let allPoured = !station.ingredients.contains { $0.pourCount == 0 && $0.grayOutReason != .depleted }
+            let ingredients = station.ingredients
+            let anyFoodColorPoured = ingredients.contains { $0.type == .foodColoring && $0.pourCount > 0 }
+            let allPoured = !ingredients.contains { ing in
+                guard ing.grayOutReason != .depleted else { return false }
+                guard ing.pourCount == 0 else { return false }
+                if ing.type == .foodColoring { return !anyFoodColorPoured }
+                return true
+            }
             if allPoured { return side }
         }
         return nil

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AVFoundation
 import RealityKit
 import ARKit
 import UIKit
@@ -16,8 +17,10 @@ final class ARCoordinator: NSObject {
     weak var arView: ARView?
     let store: Store<RootState, RootAction>
 
-    // dictionary containing sounds that have already been loaded.
+    // Spatial audio (wav/mp3) via RealityKit AudioFileResource
     var preloadedSFX: [SoundEffect: AudioFileResource] = [:]
+    // Fallback for .mov video-container files — played via AVPlayer (non-spatial)
+    var sfxAVPlayers: [SoundEffect: AVPlayer] = [:]
     // Plane visualizations keyed by ARPlaneAnchor identifier
     var planeEntities: [UUID: AnchorEntity] = [:]
 
@@ -124,5 +127,39 @@ final class ARCoordinator: NSObject {
         entity.position = carriedEntityOriginalLocalPos
         carriedEntity = nil
         carriedEntityOriginalParent = nil
+    }
+
+    // Reparents the carried entity back while preserving its current world position,
+    // then manually interpolates it to its resting spot so the animation is reliable
+    // even immediately after a reparent (entity.move() has quirks in that window).
+    func placebackEntity() {
+        guard let entity = carriedEntity,
+              let originalParent = carriedEntityOriginalParent else {
+            detachCarriedEntity()
+            return
+        }
+        let targetLocalPos = carriedEntityOriginalLocalPos
+
+        // Reparent preserving world position — entity stays in place visually.
+        // entity.position now holds the start in originalParent's local space.
+        entity.setParent(originalParent, preservingWorldTransform: true)
+        let startLocalPos = entity.position
+
+        carriedEntity = nil
+        carriedEntityOriginalParent = nil
+
+        Task { @MainActor in
+            let steps = 15
+            let stepNs: UInt64 = 26_666_667   // 15 × 26.7 ms ≈ 0.4 s
+            for i in 1...steps {
+                guard entity.parent === originalParent else { return }
+                let t = Float(i) / Float(steps)
+                let eased = 1 - pow(1 - t, 3)  // cubic ease-out
+                entity.position = startLocalPos + (targetLocalPos - startLocalPos) * eased
+                try? await Task.sleep(nanoseconds: stepNs)
+            }
+            guard entity.parent === originalParent else { return }
+            entity.position = targetLocalPos
+        }
     }
 }
