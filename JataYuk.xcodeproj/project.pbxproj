@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		DADBDD9F30359188004FBD99 /* ShaderDev in Frameworks */ = {isa = PBXBuildFile; productRef = DADBDD9E30359188004FBD99 /* ShaderDev */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D1B69DEE3028DA40007DF578 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,6 +33,16 @@
 			);
 			target = D1F5EBDB3019F4100093CA76 /* JataYuk */;
 		};
+		DADBDDA730359A88004FBD99 /* Exceptions for "JataYuk" folder in "JataYukTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Core/DesignSystem/AppFonts/Fredoka-Bold.ttf",
+				"Core/DesignSystem/AppFonts/Fredoka-Medium.ttf",
+				"Core/DesignSystem/AppFonts/Fredoka-Regular.ttf",
+				"Core/DesignSystem/AppFonts/Fredoka-SemiBold.ttf",
+			);
+			target = D1B69DE93028DA40007DF578 /* JataYukTests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -41,6 +55,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				D1F5EBE83019F4110093CA76 /* Exceptions for "JataYuk" folder in "JataYuk" target */,
+				DADBDDA730359A88004FBD99 /* Exceptions for "JataYuk" folder in "JataYukTests" target */,
 			);
 			path = JataYuk;
 			sourceTree = "<group>";
@@ -59,6 +74,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DADBDD9F30359188004FBD99 /* ShaderDev in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,6 +86,7 @@
 			children = (
 				D1F5EBDE3019F4100093CA76 /* JataYuk */,
 				D1B69DEB3028DA40007DF578 /* JataYukTests */,
+				DADBDD9D30359188004FBD99 /* Frameworks */,
 				D1F5EBDD3019F4100093CA76 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -81,6 +98,13 @@
 				D1B69DEA3028DA40007DF578 /* JataYukTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		DADBDD9D30359188004FBD99 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -126,6 +150,7 @@
 			);
 			name = JataYuk;
 			packageProductDependencies = (
+				DADBDD9E30359188004FBD99 /* ShaderDev */,
 			);
 			productName = JataYuk;
 			productReference = D1F5EBDC3019F4100093CA76 /* JataYuk.app */;
@@ -159,6 +184,9 @@
 			);
 			mainGroup = D1F5EBD33019F4100093CA76;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DADBDD9C30359180004FBD99 /* XCLocalSwiftPackageReference "ShaderDev" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D1F5EBDD3019F4100093CA76 /* Products */;
 			projectDirPath = "";
@@ -219,6 +247,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9AU55MUUW9;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = Stanley.JataYukTests;
@@ -478,6 +507,21 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		DADBDD9C30359180004FBD99 /* XCLocalSwiftPackageReference "ShaderDev" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ShaderDev;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DADBDD9E30359188004FBD99 /* ShaderDev */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DADBDD9C30359180004FBD99 /* XCLocalSwiftPackageReference "ShaderDev" */;
+			productName = ShaderDev;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D1F5EBD43019F4100093CA76 /* Project object */;
 }

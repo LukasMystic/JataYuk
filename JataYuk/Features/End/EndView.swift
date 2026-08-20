@@ -17,7 +17,7 @@ struct EndView: View {
 
     var body: some View {
         ZStack {
-
+            
             // MARK: - Background (live AR view, volcano already erupted)
             ARViewContainer(
                 store: store,
@@ -25,18 +25,28 @@ struct EndView: View {
                 isPaused: store.state.ar.isPaused
             )
             .ignoresSafeArea()
-
+            
+            // Blur layer
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
+            
+            // Dark layer
+            Color.black
+                .opacity(0.3)
+                .ignoresSafeArea()
+            
             // MARK: - Success overlay — all components appear together
             if store.state.end.isOverlayVisible {
-                VStack(spacing: 22) {
-                    //duarTitle
+                VStack(spacing: 24) {
+                    Image("Title")
+                        .frame(alignment: .center)
+                        .scaleEffect(1.1)
                     starRow
-                    Spacer().frame(height: 4)
                     successBanner
                     experimentAgainButton
                 }
-                .padding(.top, 40)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 .transition(.opacity)
             }
 
@@ -59,13 +69,13 @@ struct EndView: View {
 
     // MARK: - "duAR!" title (image asset)
 
-//    private var duarTitle: some View {
-//        Image("DuarWordmark")
-//            .resizable()
-//            .scaledToFit()
-//            .frame(height: 60)
-//            .padding(.bottom, 4)
-//    }
+    private var duarTitle: some View {
+        Image("Title")
+            .resizable()
+            .scaledToFit()
+            .frame(height: 60)
+            .padding(.bottom, 4)
+    }
 
     // MARK: - Star row (image asset, middle star bigger, matching Figma)
 
@@ -91,17 +101,14 @@ struct EndView: View {
     // MARK: - Success message banner
 
     private var successBanner: some View {
-        HStack(spacing: 8) {
-            Text("🏅You have successfully completed the Experiment!")
-                .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundStyle(Color(red: 0.949, green: 0.729, blue: 0.216))
-        }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 12)
+        Text("🏅You have successfully completed the Experiment!")
+            .font(.custom("Fredoka-SemiBold", size: 24))
+            .foregroundStyle(customColors.appYellow)
+        .padding(.horizontal, 50)
+        .padding(.vertical, 50)
         .background(
-            Capsule().fill(Color.black.opacity(0.65))
+            Capsule().glassEffect().frame(height: 55)
         )
-        .padding(.horizontal, 24)
     }
 
     // MARK: - Experiment Again button
@@ -114,12 +121,17 @@ struct EndView: View {
             store.send(.navigate(to: .ar))
         } label: {
             Text("Experiment Again")
-                .font(.system(size: 19, weight: .bold, design: .rounded))
+                .font(.custom("Fredoka-Medium", size: 20))
                 .foregroundStyle(.white)
-                .frame(maxWidth: 320)
-                .padding(.vertical, 15)
-                .background(
-                    Capsule().fill(Color(red: 0.949, green: 0.729, blue: 0.216))
+                .frame(width: 320)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 20)
+                .background(customColors.appYellow, in: Capsule())
+                .glassEffect(.regular.interactive())
+                .shadow(
+                    color: .black.opacity(0.25),
+                    radius: 4, x: 0, y: 4
+                    
                 )
         }
     }
@@ -134,15 +146,20 @@ struct EndView: View {
                     store.send(.end(.toggleOverlay))
                 } label: {
                     Image(systemName: store.state.end.isOverlayVisible ? "eye.fill" : "eye.slash.fill")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.black)
-                        .padding(10)
-                        .background(Circle().fill(Color(red: 0.949, green: 0.729, blue: 0.216)))
+                        .font(.system(size: 20, weight: .semibold))
+                        .frame(width: 57, height: 57)
                 }
+                .foregroundStyle(.white)
+                .background {
+                    Capsule()
+                        .fill(Color(red: 0.949, green: 0.729, blue: 0.216).opacity(0.85))
+                        .glassEffect()
+                }
+                .contentShape(Capsule())
             }
             Spacer()
         }
-        .padding(.top, 16)
-        .padding(.trailing, 16)
+        .padding(.top, 24)
+        .padding(.trailing, 24)
     }
 }

@@ -11,20 +11,41 @@ struct MainPageView: View {
     @ObservedObject var store: Store<MainPageState, MainPageAction>
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            VStack(alignment: .leading, spacing: 28) {
-                header
-                experimentsRow
-                Spacer(minLength: 0)
-            }
-            .padding(.top, 24)
-            .padding(.horizontal, 40)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
+        GeometryReader { geometry in
+            ZStack(alignment: .bottomLeading) {
+                customColors.appCream
+                    .ignoresSafeArea()
 
+                Image("VolcanoBackground")
+                    .resizable()
+                    .scaleEffect(1.20)
+                    .frame(
+                        width: geometry.size.width,
+                        height: geometry.size.height * 0.85
+                    )
+                    .frame(
+                        maxHeight: .infinity,
+                        alignment: .bottom
+                    )
+
+                VStack(alignment: .leading, spacing: 28) {
+                    header
+                    experimentsRow
+                    Spacer(minLength: 0)
+                }
+                .padding(.top, geometry.size.height * 0.03)
+                .padding(.horizontal, geometry.size.width * 0.04)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
     private var header: some View {
         HStack {
+            Image("Title")
+                .resizable()
+                .frame(width: 197)
+                .frame(height: 83)
+
             Spacer()
 
             DuARSegmentedControl(
@@ -43,42 +64,22 @@ struct MainPageView: View {
             } label: {
                 Image(systemName: "gearshape.fill")
                     .font(.title)
-                    .foregroundStyle(.black)            }
+            }
+            .disabled(true)
         }
     }
 
-    @ViewBuilder
     private var experimentsRow: some View {
-        switch store.state.selectedTab {
-        case .experiments:
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 24) {
-                    ForEach(store.state.experiments) { experiment in
-                        ExperimentCardView(experiment: experiment) {
-                            store.send(.playButtonTapped(experiment))
-                        }
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: 24) {
+                ForEach(store.state.experiments) { experiment in
+                    ExperimentCardView(experiment: experiment) {
+                        store.send(.playButtonTapped(experiment))
                     }
                 }
-                .padding(.vertical, 8)
             }
-
-        case .achievements:
-            achievementsPlaceholder
+            .padding(.vertical, 8)
         }
-    }
-
-    private var achievementsPlaceholder: some View {
-        VStack(spacing: 50) {
-            Image(systemName: "medal.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-
-            Text("Achievements coming soon")
-                .font(.system(size: 25))
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 100)
     }
 }
 
@@ -92,35 +93,20 @@ struct DuARSegmentedControl: View {
         HStack(spacing: 4) {
             ForEach(tabs) { tab in
                 Text(tab.rawValue)
-                    //.font(.custom("Fredoka-Bold", size: 15))
-                    .font(.system(size: 20,weight: .heavy, design: .rounded))
+                    .font(.custom("Fredoka-Medium", size: 20))
                     .foregroundStyle(
                         selection == tab ? .black : .primary
                     )
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 20)
+                    .frame(width: 430, height: 50)
                     .background {
                         if selection == tab {
-                            Capsule().fill(Color(red: 0.949, green: 0.729, blue: 0.216))}}
-                    .contentShape(Capsule())
-                    .onTapGesture {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                            selection = tab
+                            Capsule()
+                                .fill(customColors.appYellow)
                         }
+                    }
+                    .contentShape(Capsule())
                     }
             }
         }
-        .padding(6)
-        .background(.ultraThinMaterial, in: Capsule())
     }
-}
 
-#Preview (traits: .landscapeLeft) {
-    MainPageView(
-        store: Store(
-            initialState: MainPageState(),
-            reducer: MainPageReducer.reduce,
-            environment: RootEnvironment()
-        )
-    )
-}
