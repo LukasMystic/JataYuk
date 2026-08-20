@@ -52,8 +52,8 @@ extension ARCoordinator {
         }
     }
 
-    func spawnIngredients(_ ingredients: [Ingredient], on anchor: AnchorEntity, side: StationSide) async {
-        let spacing: Float = 0.18
+    func spawnIngredients(_ ingredients: [Ingredient], on anchor: Entity, side: StationSide) async {
+        let spacing: Float = 0.12
         let startX = -Float(ingredients.count - 1) * spacing / 2
 
         // Load all ingredient models in parallel.
@@ -72,20 +72,37 @@ extension ARCoordinator {
             return results.map { (index: $0.0, entity: $0.1) }
         }
 
+        var foodColoringCount = 0
+        let foodColorTints: [UIColor] = [.systemRed, .systemGreen, .systemBlue]
+
         for pair in pairs.sorted(by: { $0.index < $1.index }) {
             pair.entity.position = SIMD3(startX + Float(pair.index) * spacing, 0, 0)
             pair.entity.components.set(IngredientComponent(side: side, ingredientIndex: pair.index))
+            if ingredients[pair.index].type == .foodColoring {
+                let tint = foodColorTints[foodColoringCount % 3]
+                let dot = ModelEntity(
+                    mesh: .generateSphere(radius: 0.012),
+                    materials: [SimpleMaterial(color: tint, isMetallic: false)]
+                )
+                dot.position = SIMD3(0, -0.02, 0)
+                pair.entity.addChild(dot)
+                foodColoringCount += 1
+            }
             anchor.addChild(pair.entity)
         }
     }
 
-    func spawnMixingBeaker(on anchor: AnchorEntity, side: StationSide) async {
+    func spawnMixingBeaker(on anchor: Entity, side: StationSide) async {
         let entity = await loadAsset(
             .beaker,
             fallbackColor: UIColor.systemGray.withAlphaComponent(0.5),
             fallbackSize: [0.064, 0.07, 0.064]
         )
-        entity.position = SIMD3(0, 0, -0.25)
+        // Place beaker beside the last ingredient in the row (same Z depth).
+        let count = store.state.experiment[side].ingredients.count
+        let spacing: Float = 0.12
+        let endX = Float(count - 1) * spacing / 2 + spacing
+        entity.position = SIMD3(endX, 0, 0)
         entity.components.set(MixingBeakerComponent(side: side))
         anchor.addChild(entity)
         beakerEntities[side] = entity

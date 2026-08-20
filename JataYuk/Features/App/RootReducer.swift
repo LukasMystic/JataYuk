@@ -153,7 +153,20 @@ private func arReducer(state: inout RootState, action: ARAction) -> [Effect] {
             }
         case .soap:    state.experiment.foam.soapTbsp   += ingredient.amountPerPour
         case .yeast:   state.experiment.foam.yeastTbsp  += ingredient.amountPerPour
-        case .water, .foodColoring: break
+        case .water: break
+        case .foodColoring:
+            // One food color is enough — deplete the other variants immediately.
+            for i in state.experiment[side].ingredients.indices {
+                let ing = state.experiment[side].ingredients[i]
+                if ing.type == .foodColoring, i != index, ing.grayOutReason != .depleted {
+                    state.experiment[side].ingredients[i].grayOutReason = .depleted
+                }
+            }
+            // Record which color was selected (0=R, 1=G, 2=B) by counting food colorings before this index.
+            let fcIndex = state.experiment[side].ingredients.prefix(index)
+                .filter { $0.type == .foodColoring }
+                .count
+            state.experiment.foam.foodColorIndex = fcIndex
         }
         state.experiment[side].ingredients[index].hasPouredThisPickup = true //added
 

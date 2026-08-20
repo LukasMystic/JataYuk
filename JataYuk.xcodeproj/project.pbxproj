@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D16761C63036A010009463D6 /* ShaderDev in Frameworks */ = {isa = PBXBuildFile; productRef = D16761C53036A010009463D6 /* ShaderDev */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D1B69DEE3028DA40007DF578 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -59,17 +63,26 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D16761C63036A010009463D6 /* ShaderDev in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D16761C43036A010009463D6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D1F5EBD33019F4100093CA76 = {
 			isa = PBXGroup;
 			children = (
 				D1F5EBDE3019F4100093CA76 /* JataYuk */,
 				D1B69DEB3028DA40007DF578 /* JataYukTests */,
+				D16761C43036A010009463D6 /* Frameworks */,
 				D1F5EBDD3019F4100093CA76 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -126,6 +139,7 @@
 			);
 			name = JataYuk;
 			packageProductDependencies = (
+				D16761C53036A010009463D6 /* ShaderDev */,
 			);
 			productName = JataYuk;
 			productReference = D1F5EBDC3019F4100093CA76 /* JataYuk.app */;
@@ -488,6 +502,14 @@
 			relativePath = ShaderDev;
 		};
 /* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D16761C53036A010009463D6 /* ShaderDev */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D169EFD230358320002C2249 /* XCLocalSwiftPackageReference "ShaderDev" */;
+			productName = ShaderDev;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D1F5EBD43019F4100093CA76 /* Project object */;
 }

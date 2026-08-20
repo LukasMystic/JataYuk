@@ -114,6 +114,8 @@ struct FoamModel: Equatable {
     var tempC: Double = 30
     var containerRadiusCm: Double = 5
     var containerVolumeL: Double = 1
+    /// 0 = red, 1 = green, 2 = blue. nil means no food coloring was added.
+    var foodColorIndex: Int? = nil
 }
 
 struct FoamResult: Equatable {
@@ -147,6 +149,8 @@ extension ExperimentState {
                     Ingredient(type: .h2o2, amountPerPour: 50, h2o2Variant: .fivePct),
                     Ingredient(type: .h2o2, amountPerPour: 50, h2o2Variant: .sevenPct),
                     Ingredient(type: .soap, amountPerPour: 1),
+                    Ingredient(type: .foodColoring, amountPerPour: 1),
+                    Ingredient(type: .foodColoring, amountPerPour: 1),
                     Ingredient(type: .foodColoring, amountPerPour: 1)
                 ],
                 mixingBeaker: MixingBeaker(side: .sideA)
