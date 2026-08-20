@@ -4,9 +4,9 @@ Temporary AR object lab. Isolated from the rest of the app.
 
 ## Enable / disable
 
-`ShaderPreviewGate.isEnabled` in `ShaderPreviewGate.swift` is `true` by default, so `ContentView` shows this preview instead of the experiment.
+`ShaderPreviewGate.isEnabled` in `ShaderPreviewGate.swift` is `false`, so `ContentView` shows the real experiment.
 
-Set it to `false` to get the real app back.
+Set it to `true` to get the object lab back.
 
 ## Delete
 

@@ -64,7 +64,7 @@ enum ShaderPreviewObject: String, CaseIterable, Identifiable {
         case .foodColoringGreen: return "Label → FoodColoring_Label_Green"
         case .foodColoringBlue: return "Label → FoodColoring_Label_Blue"
         case .dishsoap: return "Liquid → M_Water + PET green"
-        case .bowl: return "Bowl → porcelain · yeast #E2C290 grain"
+        case .bowl: return "Bowl → porcelain · yeast dry grain #E2C290"
         default: return "Monolith · safe PBR"
         }
     }
@@ -100,6 +100,11 @@ enum ShaderPreviewObject: String, CaseIterable, Identifiable {
         let fitted = entity.visualBounds(relativeTo: parent)
         entity.position -= fitted.center
         return String(format: "size %.3f", maxExtent)
+    }
+
+    /// Real AR load path: strip ShaderGraph before the scene is placed.
+    static func replaceShaderGraph(on entity: Entity) {
+        applySafeMaterials(to: entity)
     }
 
     // MARK: - Monolith cache
@@ -143,6 +148,9 @@ enum ShaderPreviewObject: String, CaseIterable, Identifiable {
         if var model = entity.components[ModelComponent.self] {
             model.materials = model.materials.enumerated().map { slot, material in
                 resolve(material, path: path, slot: slot)
+            }
+            if path.lowercased().contains("yeast"), let mesh = meshWithPlanarUVs(model.mesh) {
+                model.mesh = mesh
             }
             entity.components.set(model)
         }
@@ -257,6 +265,44 @@ enum ShaderPreviewObject: String, CaseIterable, Identifiable {
             return match.make()
         }
         return ShaderPreviewMaterialID.mPET.make()
+    }
+
+    /// `SM_Yeast` ships with every UV at (0,0), so grain textures collapse to a
+    /// single texel. Rebuild a planar XY map across the disc.
+    private static func meshWithPlanarUVs(_ mesh: MeshResource, tiles: Float = 5) -> MeshResource? {
+        var contents = mesh.contents
+        var models: [MeshResource.Model] = []
+        for model in contents.models {
+            var parts: [MeshResource.Part] = []
+            for part in model.parts {
+                var part = part
+                let positions = Array(part.positions)
+                guard let minX = positions.map(\.x).min(),
+                      let maxX = positions.map(\.x).max(),
+                      let minY = positions.map(\.y).min(),
+                      let maxY = positions.map(\.y).max()
+                else {
+                    parts.append(part)
+                    continue
+                }
+                let width = max(maxX - minX, 0.0001)
+                let height = max(maxY - minY, 0.0001)
+                let uvs = positions.map { position in
+                    SIMD2(
+                        (position.x - minX) / width * tiles,
+                        (position.y - minY) / height * tiles
+                    )
+                }
+                part.textureCoordinates = MeshBuffers.TextureCoordinates(uvs)
+                parts.append(part)
+            }
+            models.append(MeshResource.Model(id: model.id, parts: parts))
+        }
+        contents.models = MeshModelCollection(models)
+        if let generated = try? MeshResource.generate(from: contents) {
+            return generated
+        }
+        return nil
     }
 
     private static func materialToken(_ material: RealityKit.Material) -> String {

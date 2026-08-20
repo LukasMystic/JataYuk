@@ -1,4 +1,5 @@
 import CoreGraphics
+import Metal
 import RealityKit
 import ShaderDev
 import UIKit
@@ -82,7 +83,7 @@ enum ShaderPreviewMaterialID: String, CaseIterable, Identifiable {
         }
     }
 
-    func make() -> PhysicallyBasedMaterial {
+    func make() -> RealityKit.Material {
         switch self {
         case .mGlass:
             // RCP graph: mix(envRadiance cyan, white*fresnel, 0.96). Opacity is
@@ -434,30 +435,24 @@ private enum ShaderPreviewPBR {
         return material
     }
 
-    /// #E2C290 in sRGB, with fine sand-grain albedo + bump. Displacement is
-    /// used as a normal so the grit reads in lighting, not as a specular map.
+    /// Purple `Sand_Normal 1` = bump. Gray `Sand_Displacement 1` = roughness,
+    /// remapped so it stays matte. Neither is used as specular.
     static func yeast() -> PhysicallyBasedMaterial {
         let tint = UIColor(red: 226 / 255, green: 194 / 255, blue: 144 / 255, alpha: 1)
-        let grain = YeastGrainMaps.shared
         var material = solid(
             tint: tint,
-            roughness: 0.58,
-            specular: 0.35,
+            roughness: 0.96,
+            specular: 0.04,
             clearcoat: 0,
-            clearcoatRoughness: 0,
-            baseTexture: grain.albedo ?? loadTexture("Sand_Displacement 1")
+            clearcoatRoughness: 1
         )
-        if let resource = loadTexture("Sand_Roughness 1") ?? grain.roughness {
-            material.roughness = .init(scale: 0.68, texture: .init(resource))
+        material.metallic = .init(floatLiteral: 0)
+        let sampler = repeatingSampler()
+        if let roughness = matteRoughness(from: "Sand_Displacement 1") {
+            material.roughness = .init(scale: 1, texture: .init(roughness, sampler: sampler))
         }
-        if let resource = grain.normal
-            ?? loadTexture("Sand_Normal 1")
-            ?? loadTexture("Sand_Displacement 1")
-        {
-            material.normal = .init(texture: .init(resource))
-        }
-        if let resource = loadTexture("Sand_Displacement 1") {
-            material.specular = .init(scale: 0.4, texture: .init(resource))
+        if let normal = loadTexture("Sand_Normal 1", semantic: .normal) {
+            material.normal = .init(texture: .init(normal, sampler: sampler))
         }
         return material
     }
@@ -539,15 +534,26 @@ private enum ShaderPreviewPBR {
     }
 
     static func loadTexture(_ stem: String) -> TextureResource? {
-        if let cached = textureCache[stem] { return cached }
-        let resource = loadTextureUncached(stem)
-        textureCache[stem] = resource
+        loadTexture(stem, semantic: .color)
+    }
+
+    static func loadTexture(
+        _ stem: String,
+        semantic: TextureResource.Semantic
+    ) -> TextureResource? {
+        let key = "\(stem)|\(semantic)"
+        if let cached = textureCache[key] { return cached }
+        let resource = loadTextureUncached(stem, semantic: semantic)
+        textureCache[key] = resource
         return resource
     }
 
     private static var textureCache: [String: TextureResource?] = [:]
 
-    private static func loadTextureUncached(_ stem: String) -> TextureResource? {
+    private static func loadTextureUncached(
+        _ stem: String,
+        semantic: TextureResource.Semantic
+    ) -> TextureResource? {
         let names = [stem, (stem as NSString).deletingPathExtension]
         let namedCandidates = names.flatMap { name -> [String] in
             [
@@ -568,7 +574,7 @@ private enum ShaderPreviewPBR {
         }
 
         for url in textureFileURLs(stem: stem) {
-            if let resource = texture(fromFile: url) { return resource }
+            if let resource = texture(fromFile: url, semantic: semantic) { return resource }
         }
         return nil
     }
@@ -579,7 +585,15 @@ private enum ShaderPreviewPBR {
         let exts = ["png", "jpg", "jpeg", "PNG", "JPG"]
         var urls: [URL] = []
 
-        let subdirs = ["", "Labels", "ShaderPreview/Labels", "USDC/textures", "textures"]
+        let subdirs = [
+            "",
+            "Labels",
+            "Textures",
+            "ShaderPreview/Labels",
+            "ShaderPreview/Textures",
+            "USDC/textures",
+            "textures",
+        ]
         for bundle in [Bundle.main, shaderDevBundle] {
             for subdir in subdirs {
                 let subdirectory: String? = subdir.isEmpty ? nil : subdir
@@ -600,38 +614,105 @@ private enum ShaderPreviewPBR {
             }
         }
 
-        let previewLabels = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .appendingPathComponent("Labels")
-        for ext in exts {
-            urls.append(previewLabels.appendingPathComponent("\(base).\(ext)"))
+        let previewRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+        for folder in ["Textures", "Labels"] {
+            let dir = previewRoot.appendingPathComponent(folder)
+            for ext in exts {
+                urls.append(dir.appendingPathComponent("\(base).\(ext)"))
+            }
+        }
+        if let rkassetsRoot {
+            for ext in exts {
+                urls.append(rkassetsRoot.appendingPathComponent("\(base).\(ext)"))
+            }
         }
 
         return urls
     }
 
     private static let sourceDir: URL? = {
+        rkassetsRoot?.appendingPathComponent("USDC/textures")
+    }()
+
+    private static let rkassetsRoot: URL? = {
         let repo = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let dir = repo.appendingPathComponent(
-            "ShaderDev/Sources/ShaderDev/ShaderDev.rkassets/USDC/textures"
+            "ShaderDev/Sources/ShaderDev/ShaderDev.rkassets"
         )
         return FileManager.default.fileExists(atPath: dir.path) ? dir : nil
     }()
 
-    private static func texture(fromFile url: URL) -> TextureResource? {
+    private static func texture(
+        fromFile url: URL,
+        semantic: TextureResource.Semantic = .color
+    ) -> TextureResource? {
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
         if let image = UIImage(contentsOfFile: url.path)?.cgImage {
-            return try? TextureResource.generate(from: image, options: .init(semantic: .color))
+            return try? TextureResource.generate(from: image, options: .init(semantic: semantic))
         }
         return try? TextureResource.load(contentsOf: url)
     }
+
+    private static func repeatingSampler() -> MaterialParameters.Texture.Sampler {
+        let descriptor = MTLSamplerDescriptor()
+        descriptor.sAddressMode = .repeat
+        descriptor.tAddressMode = .repeat
+        descriptor.minFilter = .linear
+        descriptor.magFilter = .linear
+        return .init(descriptor)
+    }
+
+    /// Displacement is mid-gray; used raw as roughness it would look satin.
+    /// Lift it into 0.90…1.0 so grain stays matte.
+    private static func matteRoughness(from stem: String) -> TextureResource? {
+        guard let url = textureFileURLs(stem: stem).first(where: {
+            FileManager.default.fileExists(atPath: $0.path)
+        }),
+              let image = UIImage(contentsOfFile: url.path)?.cgImage
+        else {
+            return loadTexture(stem, semantic: .scalar)
+        }
+        let width = image.width
+        let height = image.height
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let space = CGColorSpaceCreateDeviceRGB()
+        guard let context = CGContext(
+            data: &pixels,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: width * 4,
+            space: space,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else {
+            return loadTexture(stem, semantic: .scalar)
+        }
+        context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        for i in stride(from: 0, to: pixels.count, by: 4) {
+            let lum = Float(pixels[i]) * 0.299
+                + Float(pixels[i + 1]) * 0.587
+                + Float(pixels[i + 2]) * 0.114
+            let rough = 0.90 + (lum / 255) * 0.10
+            let g = UInt8(max(0, min(255, rough * 255)))
+            pixels[i] = g
+            pixels[i + 1] = g
+            pixels[i + 2] = g
+            pixels[i + 3] = 255
+        }
+        guard let remapped = context.makeImage() else {
+            return loadTexture(stem, semantic: .scalar)
+        }
+        return try? TextureResource.generate(
+            from: remapped,
+            options: .init(semantic: .scalar)
+        )
+    }
 }
 
-/// Fine yeast grit. Sand maps from RCP are low-frequency on typical UVs, so
-/// this bakes high-frequency speckle as albedo + a matching normal.
+/// Dry granule maps: cellular crumbs, not a wet sand/porridge sheen.
 @MainActor
 private struct YeastGrainMaps {
     static let shared = YeastGrainMaps.make()
@@ -641,7 +722,7 @@ private struct YeastGrainMaps {
     let roughness: TextureResource?
 
     private static func make() -> YeastGrainMaps {
-        let size = 256
+        let size = 512
         var albedoPixels = [UInt8](repeating: 0, count: size * size * 4)
         var normalPixels = [UInt8](repeating: 0, count: size * size * 4)
         var roughnessPixels = [UInt8](repeating: 0, count: size * size * 4)
@@ -649,11 +730,13 @@ private struct YeastGrainMaps {
 
         for y in 0..<size {
             for x in 0..<size {
-                let n0 = valueNoise(x, y, size: size, freq: 36, seed: 19)
-                let n1 = valueNoise(x, y, size: size, freq: 72, seed: 91)
-                let n2 = valueNoise(x, y, size: size, freq: 140, seed: 247)
-                let speckle = n0 * 0.45 + n1 * 0.35 + n2 * 0.20
-                height[y * size + x] = speckle
+                let cells = cellular(x, y, size: size, freq: 22, seed: 19)
+                let dust = valueNoise(x, y, size: size, freq: 96, seed: 91)
+                let fine = valueNoise(x, y, size: size, freq: 180, seed: 247)
+                let granule = (1 - cells) * 0.7
+                let detail = dust * 0.2 + fine * 0.1
+                let h = max(Float(0), min(Float(1), granule + detail))
+                height[y * size + x] = h
             }
         }
 
@@ -662,24 +745,23 @@ private struct YeastGrainMaps {
                 let i = y * size + x
                 let h = height[i]
                 let base = 4 * i
-                let shade = 0.78 + h * 0.32
-                let gAlbedo = u8(shade * 255)
-                albedoPixels[base] = gAlbedo
-                albedoPixels[base + 1] = gAlbedo
-                albedoPixels[base + 2] = gAlbedo
+                let t = h
+                albedoPixels[base] = u8(226 + t * 18)
+                albedoPixels[base + 1] = u8(194 + t * 28)
+                albedoPixels[base + 2] = u8(144 + t * 40)
                 albedoPixels[base + 3] = 255
 
                 let hx = height[y * size + (x + 1) % size] - height[y * size + (x + size - 1) % size]
                 let hy = height[((y + 1) % size) * size + x] - height[((y + size - 1) % size) * size + x]
-                let nx = -hx * 8
-                let ny = -hy * 8
+                let nx = -hx * 5.5
+                let ny = -hy * 5.5
                 let inv = 1 / max(0.0001, sqrt(nx * nx + ny * ny + 1))
                 normalPixels[base] = u8((nx * inv * 0.5 + 0.5) * 255)
                 normalPixels[base + 1] = u8((ny * inv * 0.5 + 0.5) * 255)
                 normalPixels[base + 2] = u8((inv * 0.5 + 0.5) * 255)
                 normalPixels[base + 3] = 255
 
-                let rough = 0.42 + (1 - h) * 0.45
+                let rough = 0.88 + (1 - h) * 0.12
                 let g = u8(rough * 255)
                 roughnessPixels[base] = g
                 roughnessPixels[base + 1] = g
@@ -715,6 +797,26 @@ private struct YeastGrainMaps {
             return nil
         }
         return try? TextureResource.generate(from: image, options: .init(semantic: semantic))
+    }
+
+    private static func cellular(_ x: Int, _ y: Int, size: Int, freq: Int, seed: UInt32) -> Float {
+        let fx = Float(x) / Float(size) * Float(freq)
+        let fy = Float(y) / Float(size) * Float(freq)
+        let ix = Int(floor(fx))
+        let iy = Int(floor(fy))
+        var minDist: Float = 8
+        for oy in -1...1 {
+            for ox in -1...1 {
+                let jx = ix + ox
+                let jy = iy + oy
+                let px = Float(jx) + hash(jx, jy, seed)
+                let py = Float(jy) + hash(jx, jy, seed &+ 17)
+                let dx = fx - px
+                let dy = fy - py
+                minDist = min(minDist, sqrt(dx * dx + dy * dy))
+            }
+        }
+        return min(1, minDist)
     }
 
     private static func valueNoise(_ x: Int, _ y: Int, size: Int, freq: Int, seed: UInt32) -> Float {
