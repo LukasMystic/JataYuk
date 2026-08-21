@@ -13,10 +13,7 @@ enum InstructionDerivation {
 
     static func currentInstruction(for state: RootState) -> InstructionStep? {
         switch state.currentRoute {
-        case .onboarding:
-            return nil
-
-        case .end:
+        case .loading, .onboarding, .main, .end:
             return nil
 
         case .ar:

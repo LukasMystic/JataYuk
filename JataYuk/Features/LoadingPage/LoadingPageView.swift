@@ -9,57 +9,63 @@ import SwiftUI
 
 struct LoadingPageView: View {
 
-    @ObservedObject var store: Store<
-        LoadingPageState,
-        LoadingPageAction
-    >
+    @ObservedObject var store: Store<RootState, RootAction>
 
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Color(red: 0.965, green: 0.945, blue: 0.902)
+                Color(customColors.appCream)
                     .ignoresSafeArea()
 
-                    Image("VolcanoBackground")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: geometry.size.width,
-                               height: geometry.size.height * 0.85)
-                                .frame(maxHeight: .infinity, alignment: .bottom)
-
-                VStack(spacing: 18) {
-                    Spacer()
-                        .frame(height: geometry.size.height * 0.25)
-
-                    currentGuideCard
-                        .frame(height: 550)
-                        .padding(.horizontal, 40)
-
-                    pageDots
-
-                    progressBar .frame(maxWidth: 420)
-                    
-                    Spacer()
+                Image("VolcanoBackground")
+                    .resizable()
+                    .scaledToFill()
+                    .scaleEffect(1.20)
+                    .frame(
+                        width: geometry.size.width,
+                        height: geometry.size.height * 0.85
+                    )
+                    .frame(
+                        maxHeight: .infinity,
+                        alignment: .bottom
+                    )
+                
+                VStack{
+                    currentGuideCard.padding(.horizontal, 50)
+                        .offset(y:-30)
                 }
+                
+                VStack(spacing: 18) {
+                    
+                Spacer()
+
+                pageDots
+
+                Spacer().frame(height: 20)
+
+                progressBar.frame(maxWidth: 420)
+
+                Spacer().frame(height: geometry.size.height * 0.08)
+                    }
             }
         }
         .ignoresSafeArea()
         .onAppear {
-            store.send(.onAppear)
+            store.send(.loadingPage(.onAppear))
         }
         .onDisappear {
-            store.send(.onDisappear)
+            store.send(.loadingPage(.onDisappear))
         }
     }
 
     @ViewBuilder
     private var currentGuideCard: some View {
-        if store.state.guides.indices.contains(
-            store.state.currentGuideIndex
+        if store.state.loadingPage.guides.indices.contains(
+            store.state.loadingPage.currentGuideIndex
         ) {
             GuideCardView(
-                guide: store.state.guides[
-                    store.state.currentGuideIndex
+                guide: store.state.loadingPage.guides[
+                    store.state.loadingPage.currentGuideIndex
                 ]
             )
         }
@@ -68,18 +74,16 @@ struct LoadingPageView: View {
     private var pageDots: some View {
         HStack(spacing: 8) {
             ForEach(
-                store.state.guides.indices,
+                store.state.loadingPage.guides.indices,
                 id: \.self
             ) { index in
                 Circle()
                     .fill(
-                        index == store.state.currentGuideIndex
+                        index == store.state.loadingPage.currentGuideIndex
                         ? Color.black.opacity(0.7)
                         : Color.black.opacity(0.25)
                     )
-                    .frame(
-                        width: 6,
-                        height: 6
+                    .frame(width: 6,height: 6
                     )
             }
         }
@@ -95,24 +99,14 @@ struct LoadingPageView: View {
                     .fill(Color( red: 0.949, green: 0.729, blue: 0.216))
                     .frame(
                         width: geometry.size.width
-                            * store.state.progress
+                            * store.state.loadingPage.progress
                     )
                     .animation(
                         .linear(duration: 2.5),
-                       value: store.state.progress
+                       value: store.state.loadingPage.progress
                     )
             }
         }
         .frame(height: 6)
     }
-}
-
-#Preview(traits: .landscapeLeft) {
-    LoadingPageView(
-        store: Store(
-            initialState: LoadingPageState(),
-            reducer: LoadingPageReducer.reduce,
-            environment: RootEnvironment()
-        )
-    )
 }

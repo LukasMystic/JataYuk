@@ -13,7 +13,7 @@ enum BGMTrack: Equatable {
     case experiment
 }
 
-enum SoundEffect: Equatable {
+enum SoundEffect: Equatable, Hashable {
     case buttonPress
     case placeDishSoapOrFoodColoring
     case placeGlass(StationSide)

@@ -23,8 +23,8 @@ struct MotionClient {
         var onShake: (() -> Void)?
     }
 
-    // Tilt thresholds (iPad-calibrated: fires at 45°, resets at 20°)
-    private static let pourThresholdRad  = 45.0 * .pi / 180.0
+    // Tilt thresholds (iPad-calibrated: fires at 30°, resets at 20°)
+    private static let pourThresholdRad  = 30.0 * .pi / 180.0
     private static let resetThresholdRad = 20.0 * .pi / 180.0
     // Shake threshold: userAcceleration magnitude in g (gravity already removed by device motion)
     private static let shakeThresholdG   = 1.0
@@ -69,7 +69,7 @@ struct MotionClient {
         handle.manager.startDeviceMotionUpdates(to: .main) { [handle] motion, _ in
             guard let motion else { return }
 
-            // Tilt: pitch > 45° fires pour once; gate resets below 20°
+            // Tilt: pitch > 30° fires pour once; gate resets below 20°
             let pitch = abs(motion.attitude.pitch)
             let isTilted = pitch > pourThreshold
             if isTilted, !handle.tiltFired {

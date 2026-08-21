@@ -173,7 +173,14 @@ private func arReducer(state: inout RootState, action: ARAction, environment: Ro
             }
         case .soap:    state.experiment.foam.soapTbsp   += ingredient.amountPerPour
         case .yeast:   state.experiment.foam.yeastTbsp  += ingredient.amountPerPour
-        case .water, .foodColoring: break
+        case .water: break
+        case .foodColoring:
+            // Accumulate pours per color so the foam can blend all selected colors.
+            // 0 = red, 1 = green, 2 = blue (matches spawnIngredients tint order).
+            let fcIndex = state.experiment[side].ingredients.prefix(index)
+                .filter { $0.type == .foodColoring }
+                .count
+            state.experiment.foam.foodColorPours[fcIndex, default: 0] += 1
         }
         state.experiment[side].ingredients[index].hasPouredThisPickup = true //added
 
@@ -223,6 +230,7 @@ private func arReducer(state: inout RootState, action: ARAction, environment: Ro
             state.experiment.volcanoState = .done
             state.experiment.reactionState = .done
             state.end.volcanoDoneAt = Date()
+            state.currentRoute = .end
         }
 
     case .pauseSession:
@@ -254,7 +262,7 @@ private func endReducer(state: inout RootState, action: EndAction) -> [Effect] {
     switch action {
     case .revealTick(let elapsed):
         guard state.end.volcanoDoneAt != nil, !state.end.hasRevealedControls else { break }
-        if elapsed >= 15 {
+        if elapsed >= 3 {
             state.end.isOverlayVisible = true
             state.end.hasRevealedControls = true
         }

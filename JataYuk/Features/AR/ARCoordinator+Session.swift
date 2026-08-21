@@ -45,16 +45,14 @@ extension ARCoordinator: ARSessionDelegate {
     // MARK: - Pause / Resume
 
     func pauseARSession() {
-        arView?.session.pause()
-        stopMotionMonitoring()          // stops tilt + shake CoreMotion loops
-        cancellables.removeAll()        // stops proximity SceneEvents.Update subscription
+        // Keep ARKit tracking running so resume is instant (no relocalisation needed).
+        // Only block user interactions (motion + proximity).
+        stopMotionMonitoring()
+        cancellables.removeAll()
     }
 
     func resumeARSession() {
-        guard let arView else { return }
-        let config = ARWorldTrackingConfiguration()
-        config.planeDetection = []      // already placed — no plane detection needed
-        arView.session.run(config)      // no reset options — preserves world map and anchor positions
+        // AR session was never paused — just restart the interaction listeners.
         startTiltMonitoring()
         startShakeMonitoring()
         subscribeToProximityUpdates()

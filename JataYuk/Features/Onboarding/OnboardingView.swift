@@ -13,14 +13,15 @@ struct OnboardingView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
+                customColors.appCream.ignoresSafeArea()
+                
                 Image("VolcanoBackground")
                     .resizable()
-                    .scaledToFill()
+                    .scaleEffect(1.20)
                     .frame(
                         width: geometry.size.width,
                         height: geometry.size.height * 0.85
                     )
-                    .clipped()
                     .frame(
                         maxHeight: .infinity,
                         alignment: .bottom
@@ -29,8 +30,11 @@ struct OnboardingView: View {
                 VStack(spacing: 80) {
                     Image("Title")
                         .frame(alignment: .center
-                        )
+                        ).offset(x: -10, y: -85)
+                        .scaleEffect(1.1)
+                    
                     exploreButton
+                        .offset(y: -10)
                 }
                 .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.52)
             }
@@ -41,27 +45,23 @@ struct OnboardingView: View {
     
     private var exploreButton: some View {
         Button {
+            store.send(.playButtonSound)
             store.send(.onboarding(.letsExploreTapped))
         } label: {
             Text("Let's Explore!")
-                //.font(.custom("Fredoka-Bold", size: 20))
-                .font(.system(size: 20, weight: .bold))
+                .font(.custom("Fredoka-Medium", size: 20))
                 .foregroundStyle(.white)
-                .frame(width: .infinity)
-                .padding(.vertical, 20)
-                .padding(.horizontal, 30)
-                .glassEffect(.regular.interactive().tint(Color(red: 0.949, green: 0.729, blue: 0.216))
+                .frame(width: 320)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 20)
+                .background(customColors.appYellow, in: Capsule())
+                .glassEffect(.regular.interactive())
+                .shadow(
+                    color: .black.opacity(0.25),
+                    radius: 4, x: 0, y: 4
+                    
                 )
+                
         }
     }
-}
-
-#Preview(traits: .landscapeLeft) {
-    OnboardingView(
-        store: Store(
-            initialState: RootState(),
-            reducer: rootReducer,
-            environment: RootEnvironment()
-        )
-    )
 }

@@ -34,7 +34,7 @@ enum ARProximityState: Equatable {
 
 // MARK: - Station
 
-enum StationSide: Equatable {
+enum StationSide: Equatable, Hashable {
     case sideA
     case sideB
 }

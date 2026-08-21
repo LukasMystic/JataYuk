@@ -7,6 +7,7 @@
 //
 
 import RealityKit
+import UIKit
 
 extension ARCoordinator {
 
@@ -58,6 +59,20 @@ extension ARCoordinator {
 
         if let volcanoEntity {
             volcanoEntity.components[VolcanoComponent.self] = VolcanoComponent(state: .reacting)
+        }
+
+        // Blend foam color from all poured food colorings using additive RGB mixing.
+        // Normalising by the max channel keeps colors vivid (e.g. R+G = bright yellow).
+        let pours = store.state.experiment.foam.foodColorPours
+        if !pours.isEmpty {
+            let r = CGFloat(pours[0, default: 0])
+            let g = CGFloat(pours[1, default: 0])
+            let b = CGFloat(pours[2, default: 0])
+            let maxChannel = max(r, g, b)
+            if maxChannel > 0 {
+                let color = UIColor(red: r / maxChannel, green: g / maxChannel, blue: b / maxChannel, alpha: 1.0)
+                sphSystem?.setFoamColor(color)
+            }
         }
 
         explosionStore.send(.pipelineStarted(store.state.experiment.foam))

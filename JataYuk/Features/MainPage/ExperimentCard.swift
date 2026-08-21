@@ -11,7 +11,7 @@ struct ExperimentCard: Identifiable, Equatable {
     let id: UUID = UUID()
     let category: String
     let title: String
-    //let mascotImageName: String
+    let mascotImageName: String
 }
 
 enum ExperimentData {
@@ -19,27 +19,27 @@ enum ExperimentData {
         ExperimentCard(
             category: "Chemistry",
             title: "Elephant's Toothpaste",
-            //mascotImageName: "duar_experiment_elephant_toothpaste"
+            mascotImageName: "Mascot"
         ),
         ExperimentCard(
             category: "Physics",
             title: "Pendulum Impact",
-            //mascotImageName: "duar_experiment_pendulum_impact"
+            mascotImageName: "Mascot"
         ),
         ExperimentCard(
             category: "Chemistry",
             title: "Redox Reaction",
-            //mascotImageName: "duar_experiment_redox_reaction"
+            mascotImageName: "Mascot"
         ),
         ExperimentCard(
             category: "Chemistry",
             title: "Crystal Growth",
-            //mascotImageName: "duar_experiment_crystal_growth"
+            mascotImageName: "Mascot"
         ),
         ExperimentCard(
             category: "Physics",
             title: "Solar System",
-            //mascotImageName: "duar_experiment_crystal_growth"
+            mascotImageName: "Mascot"
         )
     ]
 }
@@ -51,34 +51,45 @@ struct ExperimentCardView: View {
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
+
+            // Mascot
+            Image(experiment.mascotImageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 270, height: 340)
+                .rotationEffect(.degrees(-5))
+                .shadow(color: .white.opacity(0.9),radius: 10,x: 6,y: 9
+                )
+                .offset(x: 150, y: 30)
+
+            // Text
             VStack(alignment: .leading, spacing: 8) {
                 Text(experiment.category.uppercased())
                     .font(.system(size: 24, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.85))
+                    .foregroundStyle(.white)
+                
 
                 Text(experiment.title)
-                    //.font(.custom("Fredoka-Bold", size: 35))
-                    .font(.system(size: 35,weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(red: 0.949, green: 0.729, blue: 0.216)) //yellow
+                    .font(.custom("Fredoka-Bold", size: 64))
+                    .foregroundStyle(customColors.appYellow)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Spacer(minLength: 0)
-
-                HStack {
-                    Spacer()
-
-                    // Mascot will go here later
-                    // DuARMascotView(size: 96)
-                }
+                Spacer()
             }
-            .padding(20)
+            .frame(
+                maxWidth: .infinity,
+                maxHeight: .infinity,
+                alignment: .topLeading
+            )
+            .padding(.horizontal, 30)
+            .padding(.top, 20)
 
             playButton
                 .padding(16)
         }
-        .frame(width: 260, height: 320)
+        .frame(width: 452, height: 514)
         .background(
-            Color(red: 37 / 255, green: 57 / 255, blue: 66 / 255),
+            customColors.appBlack.opacity(0.9),
             in: RoundedRectangle(
                 cornerRadius: 20,
                 style: .continuous
@@ -93,12 +104,5 @@ struct ExperimentCardView: View {
                 .foregroundStyle(.white)
         }
     }
-}
-
-#Preview {
-    ExperimentCardView(
-        experiment: ExperimentData.experiments[0],
-        onPlayTapped: {}
-    )
 }
 

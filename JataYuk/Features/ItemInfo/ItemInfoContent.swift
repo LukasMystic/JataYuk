@@ -37,7 +37,6 @@ extension ItemInfo {
                         body: """
                         Hydrogen peroxide is a clear liquid that looks almost exactly like water, but it's actually a different substance.
                         """
-//                        mascotImageName: nil
                     ),
 
                     ItemInfoSection(
@@ -45,7 +44,6 @@ extension ItemInfo {
                         body: """
                         It's made from tiny particles called atoms. Each tiny piece has 2 hydrogen atoms and 2 oxygen atoms (H₂O₂). That's one more oxygen atom than water (H₂O)!
                         """
-//                        mascotImageName: nil
                     ),
 
                     ItemInfoSection(
@@ -53,7 +51,6 @@ extension ItemInfo {
                         body: """
                         Imagine carrying an extra balloon. Hydrogen peroxide is carrying an extra oxygen that can be released later.
                         """
-//                        mascotImageName: nil
                     ),
                     
                     ItemInfoSection(
@@ -61,7 +58,6 @@ extension ItemInfo {
                         body: """
                         You can find diluted hydrogen peroxide in some first aid kits and pharmacies. Adults sometimes use it to clean small cuts.
                         """
-//                        mascotImageName: nil
                     ),
                     
                     ItemInfoSection(
@@ -71,7 +67,6 @@ extension ItemInfo {
                         • Keep it away from your eyes.
                         • Always use it with an adult.
                         """
-//                        mascotImageName: nil
                     )
                 ]
             )
@@ -89,7 +84,6 @@ extension ItemInfo {
                         body: """
                         Dish soap is a cleaning liquid used to wash dishes, cups, and pans. It helps remove grease and food stuck on them.
                         """
-//                        mascotImageName: nil
                     ),
 
                     ItemInfoSection(
@@ -97,7 +91,6 @@ extension ItemInfo {
                         body: """
                         Dish soap contains special cleaning ingredients that like to mix with both water and oily things. That's why it helps wash away dirt so easily.
                         """
-//                        mascotImageName: nil
                     ),
 
                     ItemInfoSection(
@@ -105,7 +98,6 @@ extension ItemInfo {
                         body: """
                         Imagine a superhero that helps water grab onto greasy messes so they can be washed away.
                         """
-//                        mascotImageName: nil
                     ),
                     
                     ItemInfoSection(
@@ -113,7 +105,6 @@ extension ItemInfo {
                         body: """
                         You can find dish soap next to the kitchen sink, in supermarkets, or at the grocery stores. Almost every home has a bottle of dish soap.
                         """
-//                        mascotImageName: nil
                     ),
                     
                     ItemInfoSection(
@@ -123,7 +114,6 @@ extension ItemInfo {
                         • Keep it away from your eyes.
                         • Wipe up spills so no one slips.
                         """
-//                        mascotImageName: nil
                     )
                 ]
             )
@@ -141,7 +131,6 @@ extension ItemInfo {
                         body: """
                         Yeast is a tiny living thing. It's so small that you need a microscope to see it! Millions of yeast can fit on the tip of your finger.
                         """
-//                        mascotImageName: nil
                     ),
 
                     ItemInfoSection(
@@ -149,7 +138,6 @@ extension ItemInfo {
                         body: """
                         Yeast is made of tiny cells, just like plants, animals, and people. Even though it's alive, it doesn't have eyes, arms, or legs.
                         """
-//                        mascotImageName: nil
                     ),
 
                     ItemInfoSection(
@@ -157,7 +145,6 @@ extension ItemInfo {
                         body: """
                         Imagine thousands of tiny invisible helpers working together. You can't see them one by one, but together they can do amazing things.
                         """
-//                        mascotImageName: nil
                     ),
                     
                     ItemInfoSection(
@@ -165,7 +152,6 @@ extension ItemInfo {
                         body: """
                         You can find yeast in grocery stores, in the baking aisles. Yeast is used in bread and pizza dough recipes that helps them become soft and fluffy.
                         """
-//                        mascotImageName: nil
                     ),
                     
                     ItemInfoSection(
@@ -175,7 +161,6 @@ extension ItemInfo {
                         • Don't eat dry yeat by itself.
                         • Wash your hand after using it.
                         """
-//                        mascotImageName: nil
                     )
                 ]
             )
@@ -193,7 +178,6 @@ extension ItemInfo {
                         body: """
                         Water is a liquid that living things need to survive. We drink it, use it to wash, cook with it, and even find it in the air and inside our bodies!
                         """
-//                        mascotImageName: nil
                     ),
 
                     ItemInfoSection(
@@ -203,7 +187,6 @@ extension ItemInfo {
 
                         Think of each molecule like a tiny team: two hydrogen atoms holding onto one oxygen atom!₂O)!
                         """
-//                        mascotImageName: nil
                     ),
 
                     ItemInfoSection(
@@ -211,7 +194,6 @@ extension ItemInfo {
                         body: """
                         Think of water as a universal helper. It can mix with and carry many different things, which is why it is useful for making drinks, growing plants, cleaning, and doing science experiments.
                         """
-//                        mascotImageName: nil
                     ),
                     
                     ItemInfoSection(
@@ -222,7 +204,6 @@ extension ItemInfo {
                         • In nature in the form of rain, puddles, rivers, lakes, oceans, snow, and ice
                         • Inside plants and even inside your body!
                         """
-//                        mascotImageName: nil
                     ),
                     
                     ItemInfoSection(
@@ -235,7 +216,6 @@ extension ItemInfo {
                         • Make sure the water isn't too hot before using it with the yeast.
                         • Follow the experiment instructions and safety guidance from your adult.
                         """
-//                        mascotImageName: nil
                     )
                 ]
             )
@@ -253,7 +233,6 @@ extension ItemInfo {
                         body: """
                         Food coloring is a special liquid or gel that adds bright colors to food and drinks.
                         """
-//                        mascotImageName: nil
                     ),
 
                     ItemInfoSection(
@@ -261,7 +240,6 @@ extension ItemInfo {
                         body: """
                         It contains tiny color particles that spread through food or liquids, making them look more colorful.
                         """
-//                        mascotImageName: nil
                     ),
 
                     ItemInfoSection(
@@ -269,7 +247,6 @@ extension ItemInfo {
                         body: """
                         It's like adding a drop of paint to water. It changes the color without changing what the water is.
                         """
-//                        mascotImageName: nil
                     ),
                     
                     ItemInfoSection(
@@ -277,7 +254,6 @@ extension ItemInfo {
                         body: """
                         You can find food coloring in the baking aisles at the grocery stores or in cake decorating shops. People often use it to decorate cakes, cookies, and desserts.
                         """
-//                        mascotImageName: nil
                     ),
                     
                     ItemInfoSection(
@@ -287,7 +263,6 @@ extension ItemInfo {
                         • It can stain your hands, clothes, and tables.
                         • Clean up spills quickly.
                         """
-//                        mascotImageName: nil
                     )
                 ]
             )

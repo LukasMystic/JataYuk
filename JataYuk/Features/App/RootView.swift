@@ -14,13 +14,13 @@ struct RootView: View {
         ZStack {
             routeView
 
-            if store.state.isInstructionVisible {
-                InstructionOverlayPlaceholder(store: store)
-            }
-
             if store.state.isItemInfoVisible, let item = store.state.activeInfoItem {
                 ItemInfoView(store: store, item: item)
             }
+        }
+        .onAppear {
+            store.send(.loadingPage(.onAppear))
+            store.send(.navigate(to: store.state.currentRoute))
         }
     }
 
@@ -37,24 +37,6 @@ struct RootView: View {
             ARExperimentView(store: store)
         case .end:
             EndView(store: store)
-        }
-    }.onAppear {
-        store.send(.loadingPage(.onAppear))
-        store.send(.navigate(to: store.state.currentRoute))
-    }
-}
-
-// MARK: - Overlay Placeholders (replace with real overlays when built)
-
-private struct InstructionOverlayPlaceholder: View {
-    @ObservedObject var store: Store<RootState, RootAction>
-
-    var body: some View {
-        Color.black.opacity(0.6).ignoresSafeArea()
-        VStack(spacing: 16) {
-            Text("Instructions").font(.title).foregroundColor(.white)
-            Button("Close") { store.send(.overlay(.hideInstruction)) }
-                .foregroundColor(.white)
         }
     }
 }
